@@ -1,1 +1,1 @@
-# Platformer2DGame
+# PlatformerEducational2DGame
