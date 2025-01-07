@@ -4,9 +4,14 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Bettle
   - Ground
   - Beetle
+  - Snail
+  - Bullet
+  - Spider
+  - Water
+  - Coin
+  - Frog
   layers:
   - Default
   - TransparentFX
