@@ -12,6 +12,7 @@ TagManager:
   - Water
   - Coin
   - Frog
+  - FinishCamera
   layers:
   - Default
   - TransparentFX

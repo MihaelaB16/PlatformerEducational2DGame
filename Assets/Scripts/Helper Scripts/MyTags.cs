@@ -13,6 +13,9 @@ public class MyTags : MonoBehaviour
     public static string SPIDER_TAG = "Spider";
     public static string FROG_TAG = "Frog";
 
+    public static string GROUND_TAG = "Ground";
+    public static string WATER_TAG = "Water";
+
 } //class
 
 
