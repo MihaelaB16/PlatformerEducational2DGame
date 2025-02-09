@@ -70,6 +70,10 @@ public class NewBehaviourScript : MonoBehaviour
             StartCoroutine(SpiderDead());
             StopCoroutine(coroutine_Name);
         }
+        if(target.tag == MyTags.PLAYER_TAG)
+        {
+            target.gameObject.GetComponent<PlayerDamage>().DealDamage();
+        }
     }
 }//classs
 

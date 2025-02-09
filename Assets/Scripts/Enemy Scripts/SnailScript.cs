@@ -107,7 +107,8 @@ public class SnailScript : MonoBehaviour
             {
                 if(!stunned)
                 {
-                //print("Damage left");
+                    //print("Damage left");
+                    leftHit.collider.gameObject.GetComponent<PlayerDamage>().DealDamage();
                 }
                 else
                 {
@@ -129,6 +130,7 @@ public class SnailScript : MonoBehaviour
                 if (!stunned)
                 {
                     print("Damage right");
+                    rightHit.collider.gameObject.GetComponent<PlayerDamage>().DealDamage();
                 }
                 else
                 {
