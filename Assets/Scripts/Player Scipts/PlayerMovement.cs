@@ -32,10 +32,12 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-         //if (Physics2D.Raycast(groundCheckPosition.position, Vector2.down, 0.5f, groundLayer)) { 
-                                                                                    
-         //   print("Collision with ground ");
-         //}
+        //if (Physics2D.Raycast(groundCheckPosition.position, Vector2.down, 0.5f, groundLayer)) { 
+
+        //   print("Collision with ground ");
+        //}
+        float move = Input.GetAxis("Horizontal");
+        transform.position += new Vector3(move * Time.deltaTime * 1f, 0, 0);
 
         CheckIfGrounded();
         PlayerJump();

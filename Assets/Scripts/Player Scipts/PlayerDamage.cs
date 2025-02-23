@@ -47,6 +47,11 @@ public class PlayerDamage : MonoBehaviour
         }
        
     }
+    //void Update()
+    //{
+    //    float move = Input.GetAxis("Horizontal");
+    //    transform.position += new Vector3(move * Time.deltaTime * 5f, 0, 0);
+    //}
 
     IEnumerator WaitForDamage()
     {
@@ -57,7 +62,7 @@ public class PlayerDamage : MonoBehaviour
     IEnumerator RestartGame()
     {
         yield return new WaitForSecondsRealtime(2f); //"RealTime" deoarece Time.timeScale = 0f
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("GamePlay");
     }
 
 }//class

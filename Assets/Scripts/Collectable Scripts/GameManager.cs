@@ -30,7 +30,18 @@ public class GameManager : MonoBehaviour
 
     public void AddScore(int amount)
     {
+        Debug.Log("🔄 AddScore() apelată! Modific scorul cu: " + amount);
+
         scoreCount += amount;
+
+        if (scoreCount <= 0)
+        {
+            Debug.Log("⚠️ Scorul a ajuns la 0 sau mai mic. Resetare la 0.");
+            scoreCount = 0;
+        }
+
+        Debug.Log("✅ Scor nou: " + scoreCount);
         coinTextScore.text = "x" + scoreCount;
     }
+
 }

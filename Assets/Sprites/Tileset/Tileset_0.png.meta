@@ -454,7 +454,7 @@ TextureImporter:
         width: 203
         height: 56
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -462,6 +462,27 @@ TextureImporter:
       bones: []
       spriteID: 7f7d8efacd4cd9045815964e3320b530
       internalID: -800736987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tileset_0_0
+      rect:
+        serializedVersion: 2
+        x: 205
+        y: 273
+        width: 66
+        height: 66
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 659dba60203275c4299c908d35656ec8
+      internalID: -45935499
       vertices: []
       indices: 
       edges: []
@@ -480,6 +501,7 @@ TextureImporter:
       Block_1: -73994972
       Ground: 256752675
       GroundUpWater: -800736987
+      Tileset_0_0: -45935499
       Tileset_0_10: -350601205
       Tileset_0_11: 1409019098
       Tileset_0_12: 1431537369

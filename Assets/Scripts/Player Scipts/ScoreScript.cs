@@ -28,6 +28,14 @@ public class ScoreScript : MonoBehaviour
             //coinTextScore.text = "x" + scoreCount;
             // Actualizăm scorul prin GameManager
             GameManager.instance.AddScore(1);
+
+            StartCoroutine(ReappearCoinAfterTime(target.gameObject, 120f)); // 60f = 60 secunde
         }
+    }
+
+    IEnumerator ReappearCoinAfterTime(GameObject coin, float delay)
+    {
+        yield return new WaitForSeconds(delay); // Așteaptă 1 minut
+        coin.SetActive(true); // Re-apari moneda
     }
 }

@@ -75,7 +75,7 @@ public class NewBehaviourScript : MonoBehaviour
             target.gameObject.GetComponent<PlayerDamage>().DealDamage();
         }
     }
-}//classs
+}//class
 
 
 

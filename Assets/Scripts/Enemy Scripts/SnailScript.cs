@@ -121,6 +121,7 @@ public class SnailScript : MonoBehaviour
                     }
                 }
             }
+
         }
 
         if(rightHit)
@@ -142,6 +143,14 @@ public class SnailScript : MonoBehaviour
                 }
             }
         }
+        //if (Physics2D.Raycast(left_Collision.position, Vector2.down, 0.01f))
+        //{
+        //    ChangeDirection();
+        //}
+        //if (Physics2D.Raycast(right_Collision.position, Vector2.down, 0.01f))
+        //{
+        //    ChangeDirection();
+        //}
 
         //daca nu exista coliziune cu pamantul, schimba directia
         if (!Physics2D.Raycast(down_Collision.position, Vector2.down, 0.1f))

@@ -39,13 +39,14 @@ public class CameraFollow : MonoBehaviour
         {
             Vector3 aheadTarget = target.position + Vector3.forward * offsetZ;
 
-            if(target.position.x >= transform.position.x)
-            {
+            //daca playerul se misca in dreapta
+            //if (target.position.x >= transform.position.x)
+           // {
                 Vector3 newCameraPosition = Vector3.SmoothDamp(transform.position, aheadTarget, ref currentVelocity, cameraSpeed);
                 transform.position = new Vector3(newCameraPosition.x, transform.position.y, newCameraPosition.z);
 
                 lastTargetPosition = target.position;
-            }
+           // }
         }
     }
 } //class
