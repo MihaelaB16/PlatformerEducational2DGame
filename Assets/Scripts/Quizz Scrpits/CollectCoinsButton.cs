@@ -6,6 +6,8 @@ public class CollectCoinsButton : MonoBehaviour
     public GameObject quizCanvas; // Referință către UI-ul quizului
     public Button collectButton;  // Referință către butonul "Colectează Monede"
 
+   
+
     void Start()
     {
         collectButton.gameObject.SetActive(false); // Dezactivează butonul inițial
@@ -46,4 +48,5 @@ public class CollectCoinsButton : MonoBehaviour
         collectButton.gameObject.SetActive(false);
         Time.timeScale = 1f; // Reia jocul
     }
+
 }

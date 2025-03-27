@@ -17,13 +17,36 @@ public class QuizManager : MonoBehaviour
     public CollectCoinsButton collectCoinsButton; // Referință directă
 
 
+    public GameObject coliderLeftCheckpoint; // Collider stânga
+    public GameObject coliderRightCheckpoint; // Collider dreapta
+
+    private int questionCounter; // Mutat aici ca să fie clar
+    private static bool quizCompleted = false; // Dacă quiz-ul a fost finalizat
+
+    public TextAsset questionsFile; // Obiect JSON atribuit în Unity
+
 
     void Start()
     {
+
+          if (quizCompleted) 
+    {
+        Debug.Log("🛑 Quiz-ul a fost deja completat! Afișez doar butonul Continue.");
+        ShowContinueButton();
+        return;
+    }
+
+        questionCounter = 10; // Resetăm contorul când începe quiz-ul
         LoadQuestionsFromJSON();
         ShuffleQuestions();
         DisplayNextQuestion();
+
+        if (continueButton != null)
+        {
+            continueButton.SetActive(false); // Ascundem butonul Continue la start
+        }
     }
+
 
     void LoadQuestions()
     {
@@ -34,13 +57,10 @@ public class QuizManager : MonoBehaviour
     }
     void LoadQuestionsFromJSON()
     {
-        // Definirea căii către fișierul JSON
-        string filePath = Path.Combine(Application.streamingAssetsPath, "questions.json");
-
-        if (File.Exists(filePath))
+        if (questionsFile != null)
         {
-            // Citește fișierul JSON
-            string json = File.ReadAllText(filePath);
+            // Citește conținutul JSON direct din TextAsset
+            string json = questionsFile.text;
 
             // Deserializează conținutul fișierului JSON într-o listă de întrebări
             Question[] loadedQuestions = JsonHelper.FromJson<Question>(json);
@@ -50,9 +70,10 @@ public class QuizManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Fișierul JSON nu a fost găsit la calea: " + filePath);
+            Debug.LogError("⚠️ Obiectul TextAsset pentru întrebări nu a fost setat în Inspector!");
         }
     }
+
     public static class JsonHelper
     {
         public static T[] FromJson<T>(string json)
@@ -83,7 +104,7 @@ public class QuizManager : MonoBehaviour
 
     void DisplayNextQuestion()
     {
-        if (questions.Count > 0)
+        if (questionCounter > 0 && questions.Count > 0) // Evităm scăderea sub 0
         {
             int randomIndex = Random.Range(0, questions.Count);
             currentQuestion = questions[randomIndex];
@@ -99,7 +120,6 @@ public class QuizManager : MonoBehaviour
                 {
                     answerButtons[i].GetComponentInChildren<Text>().text = currentQuestion.answers[i];
                     int index = i;
-
                     answerButtons[i].onClick.AddListener(delegate { CheckAnswer(index); });
 
                     answerButtons[i].gameObject.SetActive(true);
@@ -110,14 +130,16 @@ public class QuizManager : MonoBehaviour
                 }
             }
 
-            Debug.Log("Întrebări rămase: " + questions.Count);  // Debugging pentru numărul de întrebări rămase
+            questionCounter--; // Scădem doar dacă există întrebări de pus
+            Debug.Log("📉 Întrebări rămase: " + questionCounter);
         }
         else
         {
-            Debug.Log("Toate întrebările au fost epuizate. Închid quiz-ul.");
-            ContinueGame();
+            Debug.Log("✅ Toate întrebările au fost finalizate! Afișez butonul Continue.");
+            ShowContinueButton();
         }
     }
+
 
 
     public void CheckAnswer(int index)
@@ -142,7 +164,7 @@ public class QuizManager : MonoBehaviour
                 {
                     collectCoinsButton.ShowCollectButton();
                 }
-                CheckGameOver(); // Verifică dacă jocul trebuie să se oprească
+                CheckGameOver();
                 return;
             }
         }
@@ -152,7 +174,7 @@ public class QuizManager : MonoBehaviour
             collectCoinsButton.CheckScore();
         }
 
-        CheckGameOver(); // Verifică din nou după actualizarea scorului
+        CheckGameOver();
 
         if (questions.Count > 0)
         {
@@ -160,9 +182,45 @@ public class QuizManager : MonoBehaviour
         }
         else
         {
-            Invoke("ContinueGame", 0.5f);
+            Debug.Log("✅ Nu mai sunt întrebări! Afișez butonul Continue.");
+            Invoke("ShowContinueButton", 0.5f);
         }
     }
+
+    // Activează butonul Continue la final
+    void ShowContinueButton()
+    {
+        if (questionCounter <= 0) // Doar când toate întrebările sunt finalizate
+        {
+            foreach (Button btn in answerButtons)
+            {
+                btn.gameObject.SetActive(false);
+            }
+
+            if (questionText != null)
+            {
+                questionText.gameObject.SetActive(false);
+            }
+
+            if (continueButton != null)
+            {
+                continueButton.SetActive(true);
+            }
+
+            Debug.Log("🎉 Quiz finalizat! Butonul 'Continue' este acum vizibil.");
+        }
+        else
+        {
+            Debug.Log("❌ Butonul Continue NU trebuie să apară încă. Întrebări rămase: " + questionCounter);
+            if (continueButton != null)
+            {
+                continueButton.SetActive(false);
+            }
+        }
+    }
+
+
+
 
     void CheckGameOver()
     {
@@ -220,20 +278,38 @@ public class QuizManager : MonoBehaviour
     }
 
 
-
     public void ContinueGame()
     {
         quizCanvas.SetActive(false);
+        continueButton.SetActive(true);
 
         if (backgroundOverlay != null)
         {
             backgroundOverlay.SetActive(false); // Dezactivează fundalul umbrit
         }
 
-        Time.timeScale = 1f;
-        Debug.Log("Quiz finalizat! Jocul continuă.");
+        if (coliderLeftCheckpoint != null)
+        {
+            coliderLeftCheckpoint.SetActive(true);
+        }
+        if (coliderRightCheckpoint != null)
+        {
+            coliderRightCheckpoint.SetActive(false);
+        }
 
-        
+        Time.timeScale = 1f;
+
+        Checkpoint.MarkCheckpointCompleted(); // ✅ Marchează checkpoint-ul ca finalizat
+
+        Debug.Log("🎉 Quiz finalizat! Jocul continuă.");
+    }
+
+
+    public void OnBackButtonPressed()
+    {
+        Debug.Log("🔄 Dezactivez ColiderLeftCheckpoint și închid quiz-ul!");
+        coliderLeftCheckpoint.SetActive(false); // Dezactivează coliderul stânga
+        quizCanvas.SetActive(false); // Închide quiz-ul
     }
 
 }

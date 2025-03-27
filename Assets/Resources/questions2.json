@@ -1,0 +1,52 @@
+[
+  {
+    "question": "Ce culoare are cerul într-o zi senină?",
+    "answers": [ "Roșu", "Albastru", "Verde", "Galben" ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Câte roți are o bicicletă?",
+    "answers": [ "Trei", "Patru", "Două", "Una" ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "Ce animal face 'miau'?",
+    "answers": [ "Câine", "Vacă", "Pisică", "Cal" ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "Câte degete avem la o mână?",
+    "answers": [ "Trei", "Patru", "Cinci", "Șase" ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "Ce bem atunci când ne este sete?",
+    "answers": [ "Lapte", "Apă", "Suc", "Ceai" ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Ce formă are mingea de fotbal?",
+    "answers": [ "Pătrată", "Triunghiulară", "Rotundă", "Dreptunghiulară" ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "Ce lumină a semaforului înseamnă 'STOP'?",
+    "answers": [ "Verde", "Galben", "Roșu", "Albastru" ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "Câte anotimpuri sunt într-un an?",
+    "answers": [ "Trei", "Patru", "Cinci", "Șase" ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Ce folosim pentru a scrie pe hârtie?",
+    "answers": [ "Pix", "Foarfecă", "Radieră", "Lipici" ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Ce fruct este galben și are formă curbată?",
+    "answers": [ "Măr", "Portocală", "Banana", "Strugure" ],
+    "correctAnswer": 2
+  }
+]

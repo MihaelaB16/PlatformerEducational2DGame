@@ -1,0 +1,52 @@
+[
+  {
+    "question": "Care este capitala Franței?",
+    "answers": [ "Paris", "Londra", "Madrid", "Berlin" ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Cât face 5 + 3?",
+    "answers": [ "6", "8", "7", "9" ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Cel mai mare ocean este?",
+    "answers": [ "Pacific", "Atlantic", "Indian", "Arctic" ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Cine a pictat Mona Lisa?",
+    "answers": [ "Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Claude Monet" ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "Care este cea mai mare planetă din sistemul nostru solar?",
+    "answers": [ "Terra", "Saturn", "Jupiter", "Marte" ],
+    "correctAnswer": 2
+  },
+  {
+    "question": "Care este moneda oficială a Japoniei?",
+    "answers": [ "Yuan", "Yen", "Won", "Ringgit" ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Cine a scris 'Hamlet'?",
+    "answers": [ "William Shakespeare", "Charles Dickens", "Mark Twain", "Jane Austen" ],
+    "correctAnswer": 0
+  },
+  {
+    "question": "Care este cel mai lung râu din lume?",
+    "answers": [ "Amazon", "Nil", "Yangtze", "Mississippi" ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Care este cel mai mare mamifer de pe planetă?",
+    "answers": [ "Elefantul african", "Balena albastră", "Girafa", "Cangurul" ],
+    "correctAnswer": 1
+  },
+  {
+    "question": "Ce gaz este responsabil pentru efectul de seră?",
+    "answers": [ "Oxigen", "Azot", "Dioxid de carbon", "Argon" ],
+    "correctAnswer": 2
+  }
+]
