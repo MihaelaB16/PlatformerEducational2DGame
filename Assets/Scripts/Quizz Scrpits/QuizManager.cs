@@ -148,42 +148,41 @@ public class QuizManager : MonoBehaviour
 
         if (index == currentQuestion.correctAnswer)
         {
-            GameManager.instance.AddScore(5);
+            GameManager.instance.AddScore(10); // ✅ Adaugă 10 în loc de 5
+            if (collectCoinsButton != null)
+            {
+                collectCoinsButton.CheckScore();
+            }
+
+            CheckGameOver();
+
+            if (questions.Count > 0 && questionCounter > 0)
+            {
+                Invoke("DisplayNextQuestion", 0.5f);
+            }
+            else if (questionCounter == 0)
+            {
+                Debug.Log("✅ Ultima întrebare a fost răspunsă corect! Afișez butonul Continue.");
+                Invoke("ShowContinueButton", 0.5f);
+            }
         }
         else
         {
-            if (GameManager.instance.scoreCount >= 10)
+            GameManager.instance.AddScore(-10); // ✅ Scade 10 în loc de 5
+
+            if (GameManager.instance.scoreCount < 0)
             {
-                GameManager.instance.AddScore(-5);
+                GameManager.instance.scoreCount = 0;
             }
-            else
+
+            if (collectCoinsButton != null)
             {
-                Debug.Log("⚠️ Nu mai ai monede! Colectează mai multe pentru a continua.");
-                GameManager.instance.AddScore(-5);
-                if (collectCoinsButton != null)
-                {
-                    collectCoinsButton.ShowCollectButton();
-                }
-                CheckGameOver();
-                return;
+                collectCoinsButton.ShowCollectButton();
             }
-        }
 
-        if (collectCoinsButton != null)
-        {
-            collectCoinsButton.CheckScore();
-        }
-
-        CheckGameOver();
-
-        if (questions.Count > 0)
-        {
-            Invoke("DisplayNextQuestion", 0.5f);
-        }
-        else
-        {
-            Debug.Log("✅ Nu mai sunt întrebări! Afișez butonul Continue.");
-            Invoke("ShowContinueButton", 0.5f);
+            CheckGameOver();
+            // ❌ Nu mai trecem la altă întrebare până nu răspunde corect
+            Debug.Log("❌ Răspuns greșit. Reîncearcă aceeași întrebare.");
         }
     }
 

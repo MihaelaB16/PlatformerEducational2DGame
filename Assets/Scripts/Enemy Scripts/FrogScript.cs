@@ -31,7 +31,7 @@ public class FrogScript : MonoBehaviour
 
     private void Update()
     {
-        if(Physics2D.OverlapCircle(transform.position, 0.5f, playerLayer))
+        if(Physics2D.OverlapCircle(transform.position, 0.3f, playerLayer))
         {
             player.GetComponent<PlayerDamage>().DealDamage();
         }

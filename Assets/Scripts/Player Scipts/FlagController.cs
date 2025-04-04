@@ -5,10 +5,14 @@ using UnityEngine;
 public class FlagController : MonoBehaviour
 {
     public GameObject messageText; 
+    public GameObject background;
+    public GameObject background2;
+
     private Rigidbody2D playerRb;
     void Start()
     {
         messageText.SetActive(false);
+        background2.SetActive(false);
         playerRb = GameObject.FindWithTag("Player").GetComponent<Rigidbody2D>();
     }
 
@@ -22,8 +26,12 @@ public class FlagController : MonoBehaviour
             messageText.SetActive(true);
 
             playerRb.velocity = Vector2.zero;  
-            playerRb.isKinematic = true;       
-                                            
+            playerRb.isKinematic = true;
+
+            // Schimbă fundalul
+            background.SetActive(false);
+            background2.SetActive(true);
+
             Invoke("HideMessage", 3f);
         }
     }
