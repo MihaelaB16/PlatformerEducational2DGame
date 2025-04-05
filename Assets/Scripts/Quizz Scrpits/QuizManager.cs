@@ -31,7 +31,7 @@ public class QuizManager : MonoBehaviour
 
           if (quizCompleted) 
     {
-        Debug.Log("🛑 Quiz-ul a fost deja completat! Afișez doar butonul Continue.");
+        Debug.Log(" Quiz-ul a fost deja completat! Afișez doar butonul Continue.");
         ShowContinueButton();
         return;
     }
@@ -70,7 +70,7 @@ public class QuizManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("⚠️ Obiectul TextAsset pentru întrebări nu a fost setat în Inspector!");
+            Debug.LogError(" Obiectul TextAsset pentru întrebări nu a fost setat în Inspector!");
         }
     }
 
@@ -131,11 +131,11 @@ public class QuizManager : MonoBehaviour
             }
 
             questionCounter--; // Scădem doar dacă există întrebări de pus
-            Debug.Log("📉 Întrebări rămase: " + questionCounter);
+            Debug.Log(" Întrebări rămase: " + questionCounter);
         }
         else
         {
-            Debug.Log("✅ Toate întrebările au fost finalizate! Afișez butonul Continue.");
+            Debug.Log(" Toate întrebările au fost finalizate! Afișez butonul Continue.");
             ShowContinueButton();
         }
     }
@@ -148,7 +148,7 @@ public class QuizManager : MonoBehaviour
 
         if (index == currentQuestion.correctAnswer)
         {
-            GameManager.instance.AddScore(10); // ✅ Adaugă 10 în loc de 5
+            GameManager.instance.AddScore(5); 
             if (collectCoinsButton != null)
             {
                 collectCoinsButton.CheckScore();
@@ -162,13 +162,13 @@ public class QuizManager : MonoBehaviour
             }
             else if (questionCounter == 0)
             {
-                Debug.Log("✅ Ultima întrebare a fost răspunsă corect! Afișez butonul Continue.");
+                Debug.Log(" Ultima întrebare a fost răspunsă corect! Afișez butonul Continue.");
                 Invoke("ShowContinueButton", 0.5f);
             }
         }
         else
         {
-            GameManager.instance.AddScore(-10); // ✅ Scade 10 în loc de 5
+            GameManager.instance.AddScore(-5); 
 
             if (GameManager.instance.scoreCount < 0)
             {
@@ -181,8 +181,8 @@ public class QuizManager : MonoBehaviour
             }
 
             CheckGameOver();
-            // ❌ Nu mai trecem la altă întrebare până nu răspunde corect
-            Debug.Log("❌ Răspuns greșit. Reîncearcă aceeași întrebare.");
+            // Nu mai trecem la altă întrebare până nu răspunde corect
+            Debug.Log("Răspuns greșit. Reîncearcă aceeași întrebare.");
         }
     }
 
@@ -206,11 +206,11 @@ public class QuizManager : MonoBehaviour
                 continueButton.SetActive(true);
             }
 
-            Debug.Log("🎉 Quiz finalizat! Butonul 'Continue' este acum vizibil.");
+            Debug.Log("Quiz finalizat! Butonul 'Continue' este acum vizibil.");
         }
         else
         {
-            Debug.Log("❌ Butonul Continue NU trebuie să apară încă. Întrebări rămase: " + questionCounter);
+            Debug.Log("Butonul Continue NU trebuie să apară încă. Întrebări rămase: " + questionCounter);
             if (continueButton != null)
             {
                 continueButton.SetActive(false);
@@ -223,11 +223,11 @@ public class QuizManager : MonoBehaviour
 
     void CheckGameOver()
     {
-        Debug.Log("🔍 CheckGameOver() apelată! Scor curent: " + GameManager.instance.scoreCount);
+        Debug.Log("CheckGameOver() apelată! Scor curent: " + GameManager.instance.scoreCount);
 
         if (GameManager.instance.scoreCount <= 0)
         {
-            Debug.Log("✅ Scor 0 detectat! Dezactivez butoanele și afișez 'Button_back'.");
+            Debug.Log("Scor 0 detectat! Dezactivez butoanele și afișez 'Button_back'.");
 
             GameManager.instance.scoreCount = 0;
             GameManager.instance.coinTextScore.text = "x0";
@@ -256,12 +256,12 @@ public class QuizManager : MonoBehaviour
             GameObject buttonBack = GameObject.Find("Button_back");
             if (buttonBack != null)
             {
-                Debug.Log("✅ Butonul 'Button_back' a fost găsit și activat!");
+                Debug.Log("Butonul 'Button_back' a fost găsit și activat!");
                 buttonBack.SetActive(true);
             }
             else
             {
-                Debug.LogError("❌ Eroare: 'Button_back' nu a fost găsit!");
+                Debug.LogError("Eroare: 'Button_back' nu a fost găsit!");
             }
 
             // Asigură-te că UI-ul este actualizat corect
@@ -273,7 +273,7 @@ public class QuizManager : MonoBehaviour
     void EnsureUIUpdated()
     {
         GameManager.instance.coinTextScore.text = "x0";
-        Debug.Log("🔄 UI actualizat forțat: " + GameManager.instance.coinTextScore.text);
+        Debug.Log("UI actualizat forțat: " + GameManager.instance.coinTextScore.text);
     }
 
 
@@ -298,7 +298,7 @@ public class QuizManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        Checkpoint.MarkCheckpointCompleted(); // ✅ Marchează checkpoint-ul ca finalizat
+        Checkpoint.MarkCheckpointCompleted(); //  Marchează checkpoint-ul ca finalizat
 
         Debug.Log("🎉 Quiz finalizat! Jocul continuă.");
     }
@@ -306,7 +306,7 @@ public class QuizManager : MonoBehaviour
 
     public void OnBackButtonPressed()
     {
-        Debug.Log("🔄 Dezactivez ColiderLeftCheckpoint și închid quiz-ul!");
+        Debug.Log(" Dezactivez ColiderLeftCheckpoint și închid quiz-ul!");
         coliderLeftCheckpoint.SetActive(false); // Dezactivează coliderul stânga
         quizCanvas.SetActive(false); // Închide quiz-ul
     }
