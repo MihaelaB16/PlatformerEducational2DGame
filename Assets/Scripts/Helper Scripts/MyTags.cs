@@ -18,6 +18,8 @@ public class MyTags : MonoBehaviour
 
     public static string COIN_TAG = "Coin";
 
+    public static string THORNS_TAG = "Thorns";
+
 } 
 
 

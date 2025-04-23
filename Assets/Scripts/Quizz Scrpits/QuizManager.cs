@@ -6,6 +6,7 @@ using System.IO;
 public class QuizManager : MonoBehaviour
 {
     public Text questionText;
+    public Image questionImage;
     public Button[] answerButtons;
     public GameObject quizCanvas;
     public GameObject continueButton;
@@ -21,7 +22,6 @@ public class QuizManager : MonoBehaviour
     public GameObject coliderRightCheckpoint; // Collider dreapta
 
     private int questionCounter; // Mutat aici ca să fie clar
-    private static bool quizCompleted = false; // Dacă quiz-ul a fost finalizat
 
     public TextAsset questionsFile; // Obiect JSON atribuit în Unity
 
@@ -29,14 +29,7 @@ public class QuizManager : MonoBehaviour
     void Start()
     {
 
-          if (quizCompleted) 
-    {
-        Debug.Log(" Quiz-ul a fost deja completat! Afișez doar butonul Continue.");
-        ShowContinueButton();
-        return;
-    }
-
-        questionCounter = 10; // Resetăm contorul când începe quiz-ul
+        questionCounter = 6; // Resetăm contorul când începe quiz-ul
         LoadQuestionsFromJSON();
         ShuffleQuestions();
         DisplayNextQuestion();
@@ -48,31 +41,49 @@ public class QuizManager : MonoBehaviour
     }
 
 
-    void LoadQuestions()
-    {
-        questions.Add(new Question("Care este capitala Franței?", new string[] { "Paris", "Londra", "Madrid", "Berlin" }, 0));
-        questions.Add(new Question("Cât face 5 + 3?", new string[] { "6", "8", "7", "9" }, 1));
-        questions.Add(new Question("Cel mai mare ocean este?", new string[] { "Pacific", "Atlantic", "Indian", "Arctic" }, 0));
-        Debug.Log("Întrebări încărcate: " + questions.Count);  // Debugging pentru a verifica numărul de întrebări
-    }
+    //void LoadQuestions()
+    //{
+    //    questions.Add(new Question("Care este capitala Franței?", new string[] { "Paris", "Londra", "Madrid", "Berlin" }, 0));
+    //    questions.Add(new Question("Cât face 5 + 3?", new string[] { "6", "8", "7", "9" }, 1));
+    //    questions.Add(new Question("Cel mai mare ocean este?", new string[] { "Pacific", "Atlantic", "Indian", "Arctic" }, 0));
+    //    Debug.Log("Întrebări încărcate: " + questions.Count);  // Debugging pentru a verifica numărul de întrebări
+    //}
     void LoadQuestionsFromJSON()
     {
         if (questionsFile != null)
         {
-            // Citește conținutul JSON direct din TextAsset
             string json = questionsFile.text;
+            QuestionData[] loadedQuestions = JsonUtility.FromJson<QuestionDataWrapper>(json).items;
 
-            // Deserializează conținutul fișierului JSON într-o listă de întrebări
-            Question[] loadedQuestions = JsonHelper.FromJson<Question>(json);
+            foreach (var data in loadedQuestions)
+            {
+                // Încarcă imaginea întrebării din Resources
+                Sprite questionImage = Resources.Load<Sprite>(data.question);
 
-            // Adaugă întrebările încărcate în lista de întrebări
-            questions = new List<Question>(loadedQuestions);
+                // Adaugă întrebarea în listă
+                questions.Add(new Question(questionImage, data.answers, data.correctAnswer));
+            }
         }
         else
         {
             Debug.LogError(" Obiectul TextAsset pentru întrebări nu a fost setat în Inspector!");
         }
     }
+
+    [System.Serializable]
+    private class QuestionData
+    {
+        public string question; // Numele fișierului imaginii
+        public string[] answers;
+        public int correctAnswer;
+    }
+
+    [System.Serializable]
+    private class QuestionDataWrapper
+    {
+        public QuestionData[] items;
+    }
+
 
     public static class JsonHelper
     {
@@ -104,23 +115,42 @@ public class QuizManager : MonoBehaviour
 
     void DisplayNextQuestion()
     {
-        if (questionCounter > 0 && questions.Count > 0) // Evităm scăderea sub 0
+        Debug.Log("Apel DisplayNextQuestion");
+        Debug.Log("questionCounter: " + questionCounter);
+        Debug.Log("Număr întrebări rămase: " + questions.Count);
+
+        if (questionCounter > 0 && questions.Count > 0)
         {
             int randomIndex = Random.Range(0, questions.Count);
             currentQuestion = questions[randomIndex];
             questions.RemoveAt(randomIndex);
 
-            questionText.text = currentQuestion.question;
+            // Afișează imaginea întrebării
+            questionImage.sprite = currentQuestion.question;
 
             for (int i = 0; i < answerButtons.Length; i++)
             {
+                // Ensure all previous listeners are removed
                 answerButtons[i].onClick.RemoveAllListeners();
 
                 if (i < currentQuestion.answers.Length)
                 {
                     answerButtons[i].GetComponentInChildren<Text>().text = currentQuestion.answers[i];
                     int index = i;
-                    answerButtons[i].onClick.AddListener(delegate { CheckAnswer(index); });
+
+                    // Add a single listener with a flag to prevent double execution
+                    answerButtons[i].onClick.AddListener(delegate {
+                        // Disable all buttons immediately to prevent multiple clicks
+                        foreach (Button btn in answerButtons)
+                        {
+                            btn.interactable = false;
+                        }
+
+                        CheckAnswer(index);
+
+                        // Re-enable buttons after a short delay
+                        Invoke("ReenableButtons", 0.5f);
+                    });
 
                     answerButtons[i].gameObject.SetActive(true);
                 }
@@ -130,25 +160,41 @@ public class QuizManager : MonoBehaviour
                 }
             }
 
-            questionCounter--; // Scădem doar dacă există întrebări de pus
-            Debug.Log(" Întrebări rămase: " + questionCounter);
+            questionCounter--;
         }
         else
         {
-            Debug.Log(" Toate întrebările au fost finalizate! Afișez butonul Continue.");
             ShowContinueButton();
         }
     }
 
+    // Add this new method to re-enable buttons
+    private void ReenableButtons()
+    {
+        foreach (Button btn in answerButtons)
+        {
+            btn.interactable = true;
+        }
+    }
 
+
+    private bool isProcessingAnswer = false;  // Add this variable at the class level
 
     public void CheckAnswer(int index)
     {
+        // Prevent multiple calls while processing an answer
+        if (isProcessingAnswer)
+        {
+            Debug.Log("Already processing an answer, ignoring this call");
+            return;
+        }
+
+        isProcessingAnswer = true;
         Debug.Log("CheckAnswer apelat! Index: " + index);
 
         if (index == currentQuestion.correctAnswer)
         {
-            GameManager.instance.AddScore(5); 
+            GameManager.instance.AddScore(5);
             if (collectCoinsButton != null)
             {
                 collectCoinsButton.CheckScore();
@@ -158,7 +204,7 @@ public class QuizManager : MonoBehaviour
 
             if (questions.Count > 0 && questionCounter > 0)
             {
-                Invoke("DisplayNextQuestion", 0.5f);
+                DisplayNextQuestion();
             }
             else if (questionCounter == 0)
             {
@@ -168,7 +214,7 @@ public class QuizManager : MonoBehaviour
         }
         else
         {
-            GameManager.instance.AddScore(-5); 
+            GameManager.instance.AddScore(-5);
 
             if (GameManager.instance.scoreCount < 0)
             {
@@ -184,7 +230,16 @@ public class QuizManager : MonoBehaviour
             // Nu mai trecem la altă întrebare până nu răspunde corect
             Debug.Log("Răspuns greșit. Reîncearcă aceeași întrebare.");
         }
+
+        // Reset the flag after a short delay
+        Invoke("ResetProcessingFlag", 0.5f);
     }
+
+    private void ResetProcessingFlag()
+    {
+        isProcessingAnswer = false;
+    }
+
 
     // Activează butonul Continue la final
     void ShowContinueButton()
@@ -199,6 +254,10 @@ public class QuizManager : MonoBehaviour
             if (questionText != null)
             {
                 questionText.gameObject.SetActive(false);
+            }
+            if (questionImage != null)
+            {
+                questionImage.gameObject.SetActive(false);
             }
 
             if (continueButton != null)
@@ -250,7 +309,7 @@ public class QuizManager : MonoBehaviour
             GameObject.Find("Button_question3")?.SetActive(false);
             GameObject.Find("Button_question4")?.SetActive(false);
             GameObject.Find("Button_ContinueGame")?.SetActive(false);
-          //  GameObject.Find("BackGroundQuiz")?.SetActive(false);
+            //  GameObject.Find("BackGroundQuiz")?.SetActive(false);
 
             // Activare buton "Button_back"
             GameObject buttonBack = GameObject.Find("Button_back");
@@ -297,9 +356,6 @@ public class QuizManager : MonoBehaviour
         }
 
         Time.timeScale = 1f;
-
-        Checkpoint.MarkCheckpointCompleted(); //  Marchează checkpoint-ul ca finalizat
-
         Debug.Log("🎉 Quiz finalizat! Jocul continuă.");
     }
 
@@ -316,11 +372,11 @@ public class QuizManager : MonoBehaviour
 [System.Serializable]
 public class Question
 {
-    public string question;
+    public Sprite question;
     public string[] answers;
     public int correctAnswer;
 
-    public Question(string q, string[] a, int correct)
+    public Question(Sprite q, string[] a, int correct)
     {
         question = q;
         answers = a;

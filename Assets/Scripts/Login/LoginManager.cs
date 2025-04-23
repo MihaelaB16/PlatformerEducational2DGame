@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LoginManager : MonoBehaviour
@@ -38,11 +39,18 @@ public class LoginManager : MonoBehaviour
             PlayerPrefs.SetString("CurrentUsername", username);
             PlayerPrefs.SetString("CurrentPassword", password);
             messageText.text = "Login successful!";
+            StartCoroutine(LoadMainMenuAfterDelay());
             // Load the game scene or continue to the main menu
         }
         else
         {
             messageText.text = "Invalid username or password.";
         }
+    }
+
+    private System.Collections.IEnumerator LoadMainMenuAfterDelay()
+    {
+        yield return new WaitForSeconds(2f);
+        SceneManager.LoadScene("MainMenu"); 
     }
 }

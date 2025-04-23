@@ -11,7 +11,7 @@ public class Checkpoint : MonoBehaviour
     public GameObject coliderLeftCheckpoint; // Collider stânga
     public GameObject coliderRightCheckpoint; // Collider dreapta
 
-    private static bool checkpointCompleted = false; // ✅ Marcare dacă acest checkpoint a fost completat
+
 
     public void OnBackButtonPressed()
     {
@@ -22,7 +22,7 @@ public class Checkpoint : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player") && !checkpointCompleted) // ✅ Verificăm dacă nu e completat
+        if (other.CompareTag("Player")) // ✅ Verificăm dacă nu e completat
         {
             StartCoroutine(HandleCheckpoint());
         }
@@ -50,11 +50,5 @@ public class Checkpoint : MonoBehaviour
 
             quizCanvas.SetActive(true);
         }
-    }
-
-    public static void MarkCheckpointCompleted() // ✅ Funcție pentru a seta checkpoint-ul ca finalizat
-    {
-        checkpointCompleted = true;
-        Debug.Log("✅ Checkpoint marcat ca finalizat!");
     }
 }

@@ -55,7 +55,6 @@ public class SnailScript : MonoBehaviour
 
     void CheckCollision()
     {
-
         RaycastHit2D leftHit = Physics2D.Raycast(left_Collision.position, Vector2.left, 0.1f,playerLayer);
         RaycastHit2D rightHit = Physics2D.Raycast(right_Collision.position, Vector2.right, 0.1f, playerLayer);
 

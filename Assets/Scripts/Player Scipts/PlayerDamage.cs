@@ -117,7 +117,7 @@ public class PlayerDamage : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag(MyTags.WATER_TAG))
+        if (other.CompareTag(MyTags.WATER_TAG) || other.CompareTag(MyTags.THORNS_TAG))
         {
             DealDamage();
         }
