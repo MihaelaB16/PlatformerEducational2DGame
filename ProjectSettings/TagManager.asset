@@ -13,6 +13,7 @@ TagManager:
   - Coin
   - Frog
   - FinishCamera
+  - Thorns
   layers:
   - Default
   - TransparentFX

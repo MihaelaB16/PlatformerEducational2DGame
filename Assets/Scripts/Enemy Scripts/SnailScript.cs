@@ -8,6 +8,7 @@ public class SnailScript : MonoBehaviour
     public float moveSpeed = 1f;
     private Rigidbody2D myBody;
     private Animator anim;
+    private AudioSource coinSound;
 
     private bool moveLeft;
 
@@ -27,6 +28,7 @@ public class SnailScript : MonoBehaviour
     {
         myBody = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        coinSound = GetComponent<AudioSource>();
 
         left_Collision_Pos = left_Collision.position;
         right_Collision_Pos = right_Collision.position;
@@ -78,7 +80,13 @@ public class SnailScript : MonoBehaviour
                     Debug.Log("Hit Count: " + hitCount);
                     if (hitCount >= 2) // Dacă a fost lovit de doua ori
                     {
+                        if (coinSound != null)
+                        {
+                            coinSound.Play();
+                        }
 
+                        // Actualizăm scorul prin GameManager
+                        GameManager.instance.AddScore(1);
                         canMove = false;
                         myBody.velocity = new Vector2(0, 0);
                         anim.Play("Stunned");
@@ -152,7 +160,7 @@ public class SnailScript : MonoBehaviour
         //}
 
         //daca nu exista coliziune cu pamantul, schimba directia
-        if (!Physics2D.Raycast(down_Collision.position, Vector2.down, 0.1f))
+        if (!Physics2D.Raycast(down_Collision.position, Vector2.down, 0.01f))
         {
            ChangeDirection();
 
@@ -163,20 +171,16 @@ public class SnailScript : MonoBehaviour
     {
         moveLeft = !moveLeft;
         Vector3 tempScale = transform.localScale;
+
         if (moveLeft)
         {
             tempScale.x = Mathf.Abs(tempScale.x);
-
-            left_Collision.position = left_Collision_Pos;
-            right_Collision.position = right_Collision_Pos;
         }
         else
         {
             tempScale.x = -Mathf.Abs(tempScale.x);
-
-            left_Collision.position = right_Collision_Pos;
-            right_Collision.position = left_Collision_Pos;
         }
+
         transform.localScale = tempScale;
     }
 
