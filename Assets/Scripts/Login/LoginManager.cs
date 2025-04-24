@@ -56,6 +56,15 @@ public class LoginManager : MonoBehaviour
             Debug.Log($"User '{username}' logged in successfully.");
 
             SceneManager.LoadScene("GamePlay");
+
+            // Add this line to initialize game with user progress after scene is loaded
+            SceneManager.sceneLoaded += (scene, mode) => {
+                if (scene.name == "GamePlay")
+                {
+                    userManager.InitializeGameWithUserProgress(username);
+                    SceneManager.sceneLoaded -= (scene, mode) => { };  // Remove the listener after it's been called
+                }
+            };
         }
         else
         {

@@ -122,7 +122,15 @@ public class PlayerDamage : MonoBehaviour
             DealDamage();
         }
     }
-
+    public int GetLives()
+    {
+        return lifeScoreCount;
+    }
+    public void SetLives(int lives)
+    {
+        lifeScoreCount = lives;
+        lifeText.text = "x" + lifeScoreCount;
+    }
 }//class
 
 

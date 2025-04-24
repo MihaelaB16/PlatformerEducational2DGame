@@ -57,6 +57,49 @@ public class UserManager : MonoBehaviour
         File.WriteAllText(userFilePath, json);
     }
 
+    // Add a new method to initialize the game state with saved progress
+    public void InitializeGameWithUserProgress(string username)
+    {
+        if (!users.ContainsKey(username))
+        {
+            Debug.LogWarning($"User '{username}' not found. Cannot initialize game state.");
+            return;
+        }
+
+        UserProgress progress = users[username].Progress;
+
+        // Set the coins in GameManager
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.scoreCount = progress.Coins;
+            if (GameManager.instance.coinTextScore != null)
+            {
+                GameManager.instance.coinTextScore.text = "x" + progress.Coins;
+            }
+
+            // Set the saved gameplay time
+            GameManager.instance.ResetGameplayTime(); // Reset first
+            if (progress.Time > 0)
+            {
+                // Load the saved time into totalGamePlayTime (need to add a method for this)
+                GameManager.instance.LoadSavedGameplayTime(progress.Time);
+            }
+        }
+
+        // Set the lives in PlayerDamage
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            PlayerDamage playerDamage = player.GetComponent<PlayerDamage>();
+            if (playerDamage != null)
+            {
+                // We'll need to add a method to set lives in PlayerDamage
+                playerDamage.SetLives(progress.Lives);
+            }
+        }
+
+        Debug.Log($"Game initialized with user '{username}' progress: Coins={progress.Coins}, Lives={progress.Lives}, Time={progress.Time}");
+    }
 
     public bool RegisterUser(string username, string password)
     {
@@ -114,7 +157,7 @@ public class UserManager : MonoBehaviour
     public void SavePlayerPosition(string username, string sceneName, Vector3 position)
     {
         Debug.Log($"Saving position for user '{username}' in scene '{sceneName}': {position}");
-
+        UserManager.instance.DisplayTimeInConsole();
         if (users.ContainsKey(username))
         {
             if (users[username].Progress.Scenes == null)
@@ -166,13 +209,46 @@ public class UserManager : MonoBehaviour
     private void OnApplicationQuit()
     {
         SavePlayerPosition();
+        SaveProgressData();
     }
 
     private void OnDisable()
     {
         SavePlayerPosition();
+        SaveProgressData();
     }
+    private void SaveProgressData()
+    {
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
+        {
+            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
+            return;
+        }
 
+        // Get current score from GameManager
+        if (GameManager.instance != null)
+        {
+            int coins = GameManager.instance.scoreCount;
+            users[currentUser].Progress.Coins = coins;
+
+            // Use the GameManager's tracked time
+            float gameplayTime = GameManager.instance.GetCurrentGameplayTime();
+            users[currentUser].Progress.Time = gameplayTime;
+        }
+
+        // Get current lives from PlayerDamage
+        PlayerDamage playerDamage = GameObject.FindGameObjectWithTag("Player")?.GetComponent<PlayerDamage>();
+        if (playerDamage != null)
+        {
+            int lives = playerDamage.GetLives();
+            users[currentUser].Progress.Lives = lives;
+        }
+
+        // Save all changes
+        SaveUsers();
+        Debug.Log($"Saved progress data for user '{currentUser}'");
+    }
     private void SavePlayerPosition()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
@@ -198,8 +274,115 @@ public class UserManager : MonoBehaviour
         Debug.Log($"Saving position for user '{currentUser}' in scene '{currentScene}': {playerPosition}");
         SavePlayerPosition(currentUser, currentScene, playerPosition);
     }
+    public void UpdateCoins(int coins)
+    {
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
+        {
+            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
+            return;
+        }
+
+        users[currentUser].Progress.Coins = coins;
+        SaveUsers();
+        Debug.Log($"Updated coins for user '{currentUser}': {coins}");
+    }
+
+    // Update lives for the current user
+    public void UpdateLives(int lives)
+    {
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
+        {
+            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
+            return;
+        }
+
+        users[currentUser].Progress.Lives = lives;
+        SaveUsers();
+        Debug.Log($"Updated lives for user '{currentUser}': {lives}");
+    }
+
+    // Update time for the current user
+    public void UpdateTime(float time)
+    {
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
+        {
+            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
+            return;
+        }
+
+        users[currentUser].Progress.Time = time;
+        SaveUsers();
+        Debug.Log($"Updated time for user '{currentUser}': {time}");
+    }
+
+    // Get the current user's progress data
+    public UserProgress GetCurrentUserProgress()
+    {
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
+        {
+            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
+            return new UserProgress();
+        }
+
+        return users[currentUser].Progress;
+    }
+
+    // Save all progress data for current user
+    public void SaveAllProgress(int coins, int lives, float time)
+    {
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
+        {
+            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
+            return;
+        }
+
+        users[currentUser].Progress.Coins = coins;
+        users[currentUser].Progress.Lives = lives;
+        users[currentUser].Progress.Time = time;
+        SaveUsers();
+        Debug.Log($"Saved all progress for user '{currentUser}': Coins={coins}, Lives={lives}, Time={time}");
+    }
+
+
+    // Add this method to UserManager.cs
+    public void DisplayTimeInConsole()
+    {
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
+        {
+            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
+            return;
+        }
+
+        float savedTime = users[currentUser].Progress.Time;
+
+        Debug.Log($"==============================================");
+        Debug.Log($"Current user: {currentUser}");
+        Debug.Log($"Total elapsed time: {savedTime.ToString("F2")} seconds");
+        Debug.Log($"That's approximately {(savedTime / 60).ToString("F2")} minutes");
+        Debug.Log($"==============================================");
+    }
+    public void SaveCurrentGameplayTime(float gameplayTime)
+    {
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
+        {
+            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
+            return;
+        }
+
+        users[currentUser].Progress.Time = gameplayTime;
+        SaveUsers();
+        Debug.Log($"Updated gameplay time for user '{currentUser}': {gameplayTime.ToString("F2")} seconds");
+    }
 
 }
+
 
 [System.Serializable]
 public class UserData
