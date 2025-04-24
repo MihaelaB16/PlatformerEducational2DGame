@@ -217,6 +217,9 @@ public class UserManager : MonoBehaviour
         SavePlayerPosition();
         SaveProgressData();
     }
+    
+
+    // Modify the SaveProgressData method
     private void SaveProgressData()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
@@ -232,9 +235,11 @@ public class UserManager : MonoBehaviour
             int coins = GameManager.instance.scoreCount;
             users[currentUser].Progress.Coins = coins;
 
-            // Use the GameManager's tracked time
+            // Use the GameManager's tracked time directly (don't add to previous time)
             float gameplayTime = GameManager.instance.GetCurrentGameplayTime();
             users[currentUser].Progress.Time = gameplayTime;
+
+            Debug.Log($"Saving time for '{currentUser}': {gameplayTime} seconds");
         }
 
         // Get current lives from PlayerDamage
@@ -249,6 +254,7 @@ public class UserManager : MonoBehaviour
         SaveUsers();
         Debug.Log($"Saved progress data for user '{currentUser}'");
     }
+
     private void SavePlayerPosition()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
@@ -376,11 +382,11 @@ public class UserManager : MonoBehaviour
             return;
         }
 
+        // Store the gameplayTime directly (don't add to previous time)
         users[currentUser].Progress.Time = gameplayTime;
         SaveUsers();
         Debug.Log($"Updated gameplay time for user '{currentUser}': {gameplayTime.ToString("F2")} seconds");
     }
-
 }
 
 

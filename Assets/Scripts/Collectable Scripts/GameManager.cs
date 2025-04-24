@@ -100,13 +100,19 @@ public class GameManager : MonoBehaviour
         Debug.Log("Started tracking gameplay time");
     }
 
+    // In GameManager.cs, modify StopTimeTracking to log more details
     public void StopTimeTracking()
     {
         if (isTrackingTime)
         {
-            totalGamePlayTime += (Time.time - gamePlayTimeStart);
+            float currentTime = Time.time;
+            float elapsedTime = currentTime - gamePlayTimeStart;
+            float newTotal = totalGamePlayTime + elapsedTime;
+
+            Debug.Log($"Stopping time tracking: Current={currentTime}, Start={gamePlayTimeStart}, Elapsed={elapsedTime}, Previous Total={totalGamePlayTime}, New Total={newTotal}");
+
+            totalGamePlayTime = newTotal;
             isTrackingTime = false;
-            Debug.Log($"Stopped tracking gameplay time. Total: {totalGamePlayTime.ToString("F2")} seconds");
 
             // Save the current accumulated time
             if (UserManager.instance != null)
@@ -115,14 +121,27 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
     public float GetCurrentGameplayTime()
     {
+        float result;
+
         if (isTrackingTime)
         {
-            return totalGamePlayTime + (Time.time - gamePlayTimeStart);
+            float currentTime = Time.time;
+            float elapsedTime = currentTime - gamePlayTimeStart;
+            result = totalGamePlayTime + elapsedTime;
+            Debug.Log($"GetCurrentGameplayTime: Current={currentTime}, Start={gamePlayTimeStart}, Elapsed={elapsedTime}, Previous Total={totalGamePlayTime}, Result={result}");
         }
-        return totalGamePlayTime;
+        else
+        {
+            result = totalGamePlayTime;
+            Debug.Log($"GetCurrentGameplayTime (not tracking): Result={result}");
+        }
+
+        return result;
     }
+
 
     // Reset the gameplay time counter (e.g., when switching users)
     public void ResetGameplayTime()
