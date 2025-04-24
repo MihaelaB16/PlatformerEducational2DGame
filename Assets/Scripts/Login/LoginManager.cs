@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -8,6 +8,22 @@ public class LoginManager : MonoBehaviour
     public InputField passwordInput;
     public Text messageText;
     private UserManager userManager;
+
+    public static LoginManager instance;
+    private string loggedInUsername;
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
@@ -29,24 +45,35 @@ public class LoginManager : MonoBehaviour
         }
     }
 
-    public void Login()
+    public void OnLoginButtonClicked()
     {
         string username = usernameInput.text;
         string password = passwordInput.text;
 
         if (userManager.LoginUser(username, password, out UserProgress progress))
         {
-            PlayerPrefs.SetString("CurrentUsername", username);
-            PlayerPrefs.SetString("CurrentPassword", password);
-            messageText.text = "Login successful!";
-            StartCoroutine(LoadMainMenuAfterDelay());
-            // Load the game scene or continue to the main menu
+            LoginManager.instance.SetLoggedInUsername(username);
+            Debug.Log($"User '{username}' logged in successfully.");
+
+            SceneManager.LoadScene("GamePlay");
         }
         else
         {
-            messageText.text = "Invalid username or password.";
+            Debug.LogError("Invalid username or password.");
         }
     }
+
+    public void SetLoggedInUsername(string username)
+    {
+        loggedInUsername = username;
+        Debug.Log($"Logged-in user set to: {loggedInUsername}");
+    }
+
+    public string GetLoggedInUsername()
+    {
+        return loggedInUsername;
+    }
+
 
     private System.Collections.IEnumerator LoadMainMenuAfterDelay()
     {

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -24,9 +25,25 @@ public class PlayerMovement : MonoBehaviour
         anim = GetComponent<Animator>();
     }
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        Debug.Log($"Current logged-in user: {currentUser}");
+        if (string.IsNullOrEmpty(currentUser))
+        {
+            Debug.LogError("No logged-in user found. Cannot restore player position.");
+            return;
+        }
+
+        string currentScene = SceneManager.GetActiveScene().name;
+        if (string.IsNullOrEmpty(currentScene))
+        {
+            Debug.LogError("Current scene name is null or empty. Cannot restore player position.");
+            return;
+        }
+
+        Vector3 savedPosition = UserManager.instance.LoadPlayerPosition(currentUser, currentScene);
+        transform.position = savedPosition;
     }
 
     // Update is called once per frame
@@ -36,12 +53,15 @@ public class PlayerMovement : MonoBehaviour
 
         //   print("Collision with ground ");
         //}
+        Debug.Log($"Player position in Update: {transform.position}");
         float move = Input.GetAxis("Horizontal");
         transform.position += new Vector3(move * Time.deltaTime * 1f, 0, 0);
 
         CheckIfGrounded();
         PlayerJump();
     }
+
+
     private void FixedUpdate()
     {
         PlayerWalk();
