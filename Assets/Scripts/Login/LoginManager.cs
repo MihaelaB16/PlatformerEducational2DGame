@@ -37,11 +37,11 @@ public class LoginManager : MonoBehaviour
 
         if (userManager.RegisterUser(username, password))
         {
-            messageText.text = "Registration successful!";
+            messageText.text = "Înregistrare reușită!";
         }
         else
         {
-            messageText.text = "Username already exists.";
+            messageText.text = "Utilizatorul deja există!";
         }
     }
 
@@ -54,20 +54,13 @@ public class LoginManager : MonoBehaviour
         {
             LoginManager.instance.SetLoggedInUsername(username);
             Debug.Log($"User '{username}' logged in successfully.");
+            messageText.text = $"Utilizatorul '{username}' a fost logat cu succes.";
+            SceneManager.LoadScene("MainMenu");
 
-            SceneManager.LoadScene("GamePlay");
-
-            // Add this line to initialize game with user progress after scene is loaded
-            SceneManager.sceneLoaded += (scene, mode) => {
-                if (scene.name == "GamePlay")
-                {
-                    userManager.InitializeGameWithUserProgress(username);
-                    SceneManager.sceneLoaded -= (scene, mode) => { };  // Remove the listener after it's been called
-                }
-            };
         }
         else
         {
+            messageText.text = "Nume de utilizator sau parolă incorectă";
             Debug.LogError("Invalid username or password.");
         }
     }
