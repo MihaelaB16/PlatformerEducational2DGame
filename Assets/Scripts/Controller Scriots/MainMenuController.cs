@@ -16,38 +16,35 @@ public class MainMenuController : MonoBehaviour
             Debug.LogError("UserManager instance not found!");
         }
     }
-    public void PlayGame()
+    public void PlayGame(string sceneName)
     {
-        SceneManager.LoadScene("Gameplay");
+        SceneManager.LoadScene(sceneName);
 
-        
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GamePlay")
+        // Get the current logged in username from LoginManager
+        string username = LoginManager.instance?.GetLoggedInUsername();
+
+        if (string.IsNullOrEmpty(username))
         {
-            // Get the current logged in username from LoginManager
-            string username = LoginManager.instance?.GetLoggedInUsername();
-
-            if (string.IsNullOrEmpty(username))
-            {
-                Debug.LogError("No user is currently logged in!");
-                return;
-            }
-
-            if (userManager != null)
-            {
-                userManager.InitializeGameWithUserProgress(username);
-                Debug.Log($"Progress initialized for user: {username}");
-            }
-            else
-            {
-                Debug.LogError("UserManager instance is null, cannot initialize progress!");
-            }
-
-            // Remove the listener after it's been called to prevent multiple registrations
-            SceneManager.sceneLoaded -= OnSceneLoaded;
+            Debug.LogError("No user is currently logged in!");
+            return;
         }
+
+        if (userManager != null)
+        {
+            userManager.InitializeGameWithUserProgress(username);
+            Debug.Log($"Progress initialized for user: {username}");
+        }
+        else
+        {
+            Debug.LogError("UserManager instance is null, cannot initialize progress!");
+        }
+
+        // Remove the listener after it's been called to prevent multiple registrations
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 }

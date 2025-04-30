@@ -5,7 +5,7 @@ using System.IO;
 
 public class QuizManager : MonoBehaviour
 {
-    public Text questionText;
+    
     public Image questionImage;
     public Button[] answerButtons;
     public GameObject quizCanvas;
@@ -251,10 +251,7 @@ public class QuizManager : MonoBehaviour
                 btn.gameObject.SetActive(false);
             }
 
-            if (questionText != null)
-            {
-                questionText.gameObject.SetActive(false);
-            }
+           
             if (questionImage != null)
             {
                 questionImage.gameObject.SetActive(false);

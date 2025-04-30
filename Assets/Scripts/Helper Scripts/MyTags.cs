@@ -20,6 +20,8 @@ public class MyTags : MonoBehaviour
 
     public static string THORNS_TAG = "Thorns";
 
+    public static string SUBWAY1_TAG = "subway1";
+    public static string SUBWAY2_TAG = "subway2";
 } 
 
 

@@ -13,5 +13,8 @@ EditorBuildSettings:
     guid: 3eb7dbe957909de4eb9043f582627f3a
   - enabled: 1
     path: Assets/Scenes/GamePlay.unity
+    guid: f137ec8d588d350429385d1a4b566c8f
+  - enabled: 1
+    path: Assets/Scenes/GamePlayRomana.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   m_configObjects: {}
