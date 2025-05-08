@@ -10,6 +10,11 @@ public class UserManager : MonoBehaviour
     private string userFilePath;
     private Dictionary<string, UserData> users;
 
+    private float currentSessionTime = 0f;
+    private float jsonTimeGamePlay = 0f;
+    private float jsonTimeGamePlayRomana = 0f;
+
+
     void Awake()
     {
         if (instance == null)
@@ -25,6 +30,13 @@ public class UserManager : MonoBehaviour
         userFilePath = Path.Combine(Application.persistentDataPath, "users.json");
         LoadUsers();
     }
+
+
+    void Update()
+    {
+        currentSessionTime += Time.deltaTime; // Increment session time
+    }
+
 
     void LoadUsers()
     {
@@ -57,7 +69,6 @@ public class UserManager : MonoBehaviour
         File.WriteAllText(userFilePath, json);
     }
 
-    // Add a new method to initialize the game state with saved progress
     public void InitializeGameWithUserProgress(string username)
     {
         if (!users.ContainsKey(username))
@@ -86,21 +97,19 @@ public class UserManager : MonoBehaviour
             }
 
             GameManager.instance.ResetGameplayTime();
-            GameManager.instance.LoadSavedGameplayTime(sceneData.Time);
         }
 
-        // Set the lives in PlayerDamage
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        // Initialize time variables
+        if (currentScene == "GamePlay")
         {
-            PlayerDamage playerDamage = player.GetComponent<PlayerDamage>();
-            if (playerDamage != null)
-            {
-                playerDamage.SetLives(sceneData.Lives);
-            }
+            jsonTimeGamePlay = sceneData.Time;
+        }
+        else if (currentScene == "GamePlayRomana")
+        {
+            jsonTimeGamePlayRomana = sceneData.Time;
         }
 
-        Debug.Log($"Game initialized with user '{username}' progress for scene '{currentScene}': Coins={sceneData.Coins}, Lives={sceneData.Lives}, Time={sceneData.Time}");
+        currentSessionTime = 0f; // Reset session time
     }
 
 
@@ -227,8 +236,6 @@ public class UserManager : MonoBehaviour
         SaveProgressData();
     }
 
-
-    // Modify the SaveProgressData method
     private void SaveProgressData()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
@@ -245,23 +252,66 @@ public class UserManager : MonoBehaviour
             users[currentUser].Progress.Scenes[currentScene] = new SceneData();
         }
 
+
         // Get current score from GameManager
         if (GameManager.instance != null)
         {
-            users[currentUser].Progress.Scenes[currentScene].Coins = GameManager.instance.scoreCount;
-            users[currentUser].Progress.Scenes[currentScene].Time = GameManager.instance.GetCurrentGameplayTime();
+            int currentCoins = GameManager.instance.scoreCount;
+            users[currentUser].Progress.Scenes[currentScene].Coins = currentCoins;
+            UpdateCoins(currentCoins); // Update total coins
         }
 
         // Get current lives from PlayerDamage
-        PlayerDamage playerDamage = GameObject.FindGameObjectWithTag("Player")?.GetComponent<PlayerDamage>();
-        if (playerDamage != null)
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
         {
-            users[currentUser].Progress.Scenes[currentScene].Lives = playerDamage.GetLives();
+            PlayerDamage playerDamage = player.GetComponent<PlayerDamage>();
+            if (playerDamage != null)
+            {
+                int currentLives = playerDamage.GetLives();
+                users[currentUser].Progress.Scenes[currentScene].Lives = currentLives;
+                UpdateLives(currentLives); // Update total lives
+            }
         }
 
+        // Calculate total time for the current scene
+        float totalTimeForCurrentScene = currentSessionTime;
+        if (currentScene == "GamePlay")
+        {
+            totalTimeForCurrentScene += jsonTimeGamePlay;
+        }
+        else if (currentScene == "GamePlayRomana")
+        {
+            totalTimeForCurrentScene += jsonTimeGamePlayRomana;
+        }
+
+        // Save the total time in JSON for the current scene
+        users[currentUser].Progress.Scenes[currentScene].Time = totalTimeForCurrentScene;
+
+        // Calculate the total time across all scenes
+        int totalCoins = 0;
+        int totalLives = 0;
+        float totalTimeAcrossScenes = 0f;
+        foreach (var scene in users[currentUser].Progress.Scenes.Values)
+        {
+            totalCoins += scene.Coins;
+            totalLives += scene.Lives;
+            totalTimeAcrossScenes += scene.Time;
+        }
+
+        // Save the totals in the user's overall progress
+        users[currentUser].Progress.Coins = totalCoins;
+        users[currentUser].Progress.Lives = totalLives;
+        users[currentUser].Progress.Time = totalTimeAcrossScenes;
+
+        // Save the updated data
         SaveUsers();
-        Debug.Log($"Saved progress data for user '{currentUser}' in scene '{currentScene}'");
+
+        Debug.Log($"Saved progress data for user '{currentUser}': Total Time for Current Scene={totalTimeForCurrentScene}, Total Time Across Scenes={totalTimeAcrossScenes}");
     }
+
+
+
 
     private void SavePlayerPosition()
     {
