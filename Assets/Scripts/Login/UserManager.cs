@@ -66,24 +66,27 @@ public class UserManager : MonoBehaviour
             return;
         }
 
-        UserProgress progress = users[username].Progress;
+        string currentScene = SceneManager.GetActiveScene().name;
+
+        if (!users[username].Progress.Scenes.ContainsKey(currentScene))
+        {
+            Debug.LogWarning($"No progress found for user '{username}' in scene '{currentScene}'.");
+            return;
+        }
+
+        SceneData sceneData = users[username].Progress.Scenes[currentScene];
 
         // Set the coins in GameManager
         if (GameManager.instance != null)
         {
-            GameManager.instance.scoreCount = progress.Coins;
+            GameManager.instance.scoreCount = sceneData.Coins;
             if (GameManager.instance.coinTextScore != null)
             {
-                GameManager.instance.coinTextScore.text = "x" + progress.Coins;
+                GameManager.instance.coinTextScore.text = "x" + sceneData.Coins;
             }
 
-            // Set the saved gameplay time
-            GameManager.instance.ResetGameplayTime(); // Reset first
-            if (progress.Time > 0)
-            {
-                // Load the saved time into totalGamePlayTime (need to add a method for this)
-                GameManager.instance.LoadSavedGameplayTime(progress.Time);
-            }
+            GameManager.instance.ResetGameplayTime();
+            GameManager.instance.LoadSavedGameplayTime(sceneData.Time);
         }
 
         // Set the lives in PlayerDamage
@@ -93,13 +96,13 @@ public class UserManager : MonoBehaviour
             PlayerDamage playerDamage = player.GetComponent<PlayerDamage>();
             if (playerDamage != null)
             {
-                // We'll need to add a method to set lives in PlayerDamage
-                playerDamage.SetLives(progress.Lives);
+                playerDamage.SetLives(sceneData.Lives);
             }
         }
 
-        Debug.Log($"Game initialized with user '{username}' progress: Coins={progress.Coins}, Lives={progress.Lives}, Time={progress.Time}");
+        Debug.Log($"Game initialized with user '{username}' progress for scene '{currentScene}': Coins={sceneData.Coins}, Lives={sceneData.Lives}, Time={sceneData.Time}");
     }
+
 
     public bool RegisterUser(string username, string password)
     {
@@ -115,16 +118,22 @@ public class UserManager : MonoBehaviour
             Progress = new UserProgress()
         };
 
-        // Inițializează poziția pentru scena GamePlay
+        // Inițializează pozițiile și progresul pentru ambele scene
         newUser.Progress.Scenes["GamePlay"] = new SceneData
         {
-            LastFlagPosition = new SerializableVector3(-10.0f, -3.0f, 0.0f) // Poziția implicită
+            LastFlagPosition = new SerializableVector3(-10.0f, -3.0f, 0.0f)
+        };
+
+        newUser.Progress.Scenes["GamePlayRomana"] = new SceneData
+        {
+            LastFlagPosition = new SerializableVector3(-10.0f, -3.0f, 0.0f)
         };
 
         users[username] = newUser;
         SaveUsers();
         return true;
     }
+
 
     public bool LoginUser(string username, string password, out UserProgress progress)
     {
@@ -217,7 +226,7 @@ public class UserManager : MonoBehaviour
         SavePlayerPosition();
         SaveProgressData();
     }
-    
+
 
     // Modify the SaveProgressData method
     private void SaveProgressData()
@@ -229,30 +238,29 @@ public class UserManager : MonoBehaviour
             return;
         }
 
+        string currentScene = SceneManager.GetActiveScene().name;
+
+        if (!users[currentUser].Progress.Scenes.ContainsKey(currentScene))
+        {
+            users[currentUser].Progress.Scenes[currentScene] = new SceneData();
+        }
+
         // Get current score from GameManager
         if (GameManager.instance != null)
         {
-            int coins = GameManager.instance.scoreCount;
-            users[currentUser].Progress.Coins = coins;
-
-            // Use the GameManager's tracked time directly (don't add to previous time)
-            float gameplayTime = GameManager.instance.GetCurrentGameplayTime();
-            users[currentUser].Progress.Time = gameplayTime;
-
-            Debug.Log($"Saving time for '{currentUser}': {gameplayTime} seconds");
+            users[currentUser].Progress.Scenes[currentScene].Coins = GameManager.instance.scoreCount;
+            users[currentUser].Progress.Scenes[currentScene].Time = GameManager.instance.GetCurrentGameplayTime();
         }
 
         // Get current lives from PlayerDamage
         PlayerDamage playerDamage = GameObject.FindGameObjectWithTag("Player")?.GetComponent<PlayerDamage>();
         if (playerDamage != null)
         {
-            int lives = playerDamage.GetLives();
-            users[currentUser].Progress.Lives = lives;
+            users[currentUser].Progress.Scenes[currentScene].Lives = playerDamage.GetLives();
         }
 
-        // Save all changes
         SaveUsers();
-        Debug.Log($"Saved progress data for user '{currentUser}'");
+        Debug.Log($"Saved progress data for user '{currentUser}' in scene '{currentScene}'");
     }
 
     private void SavePlayerPosition()
@@ -323,6 +331,8 @@ public class UserManager : MonoBehaviour
         SaveUsers();
         Debug.Log($"Updated time for user '{currentUser}': {time}");
     }
+
+
 
     // Get the current user's progress data
     public UserProgress GetCurrentUserProgress()
@@ -415,11 +425,26 @@ public class UserProgress
         AnsweredQuestions = new List<string>(); // Listă goală
     }
 }
+
 [System.Serializable]
 public class SceneData
 {
     public SerializableVector3 LastFlagPosition;
+    public int Coins;
+    public int Lives;
+    public float Time;
+    public List<string> AnsweredQuestions;
+
+    public SceneData()
+    {
+        LastFlagPosition = new SerializableVector3(0, 0, 0);
+        Coins = 0;
+        Lives = 3; // Număr implicit de vieți
+        Time = 0.0f;
+        AnsweredQuestions = new List<string>();
+    }
 }
+
 
 
 [System.Serializable]
