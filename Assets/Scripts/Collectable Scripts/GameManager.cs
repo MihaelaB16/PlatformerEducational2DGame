@@ -159,4 +159,20 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Loaded saved gameplay time: {totalGamePlayTime.ToString("F2")} seconds");
     }
 
+    public void LoadMainMenu()
+    {
+        if (UserManager.instance != null)
+        {
+            UserManager.instance.SavePlayerPosition();
+            UserManager.instance.SaveProgressData();
+        }
+        else
+        {
+            Debug.LogError("UserManager instance is null. Cannot save player position or progress data.");
+        }
+        Debug.Log("Se încarcă scena MainMenu...");
+        SceneManager.LoadScene("MainMenu");
+    }
+  
+
 }

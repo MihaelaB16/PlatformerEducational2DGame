@@ -15,7 +15,7 @@ public class UserManager : MonoBehaviour
     private float jsonTimeGamePlayRomana = 0f;
 
 
-    void Awake()
+    private void Awake()
     {
         if (instance == null)
         {
@@ -236,7 +236,7 @@ public class UserManager : MonoBehaviour
         SaveProgressData();
     }
 
-    private void SaveProgressData()
+    public void SaveProgressData()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
@@ -313,7 +313,7 @@ public class UserManager : MonoBehaviour
 
 
 
-    private void SavePlayerPosition()
+    public void SavePlayerPosition()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
@@ -446,6 +446,20 @@ public class UserManager : MonoBehaviour
         users[currentUser].Progress.Time = gameplayTime;
         SaveUsers();
         Debug.Log($"Updated gameplay time for user '{currentUser}': {gameplayTime.ToString("F2")} seconds");
+    }
+    public void LogoutUser()
+    {
+        Debug.Log("Logging out the current user and resetting state.");
+        currentSessionTime = 0f;
+        jsonTimeGamePlay = 0f;
+        jsonTimeGamePlayRomana = 0f;
+
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        if (!string.IsNullOrEmpty(currentUser) && users.ContainsKey(currentUser))
+        {
+            users[currentUser].Progress = new UserProgress();
+            SaveUsers();
+        }
     }
 }
 

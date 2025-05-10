@@ -1,11 +1,15 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenuController : MonoBehaviour
 {
     private UserManager userManager;
+    public InputField usernameInput; // For the username input field
+    public InputField passwordInput; // For the password input field
+    public Text messageText;         // For the message text
 
     private void Start()
     {
@@ -19,32 +23,53 @@ public class MainMenuController : MonoBehaviour
     public void PlayGame(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
-
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+    void OnEnable()
+    {
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Get the current logged in username from LoginManager
-        string username = LoginManager.instance?.GetLoggedInUsername();
-
-        if (string.IsNullOrEmpty(username))
+        if (scene.name == "Login")
         {
-            Debug.LogError("No user is currently logged in!");
-            return;
-        }
+            usernameInput = GameObject.Find("UsernameInput")?.GetComponent<InputField>();
+            passwordInput = GameObject.Find("PasswordInput")?.GetComponent<InputField>();
+            messageText = GameObject.Find("MessageText")?.GetComponent<Text>();
 
-        if (userManager != null)
-        {
-            userManager.InitializeGameWithUserProgress(username);
-            Debug.Log($"Progress initialized for user: {username}");
+            Button loginButton = GameObject.Find("LoginButton")?.GetComponent<Button>();
+            if (loginButton != null)
+            {
+                loginButton.onClick.RemoveAllListeners();
+                loginButton.onClick.AddListener(() =>
+                {
+                    if (LoginManager.instance != null)
+                    {
+                        LoginManager.instance.OnLoginButtonClicked(); // Call the method from LoginManager
+                    }
+                    else
+                    {
+                        Debug.LogError("LoginManager instance is null.");
+                    }
+                });
+            }
+            else
+            {
+                Debug.LogError("Login button not found in the scene.");
+            }
         }
-        else
-        {
-            Debug.LogError("UserManager instance is null, cannot initialize progress!");
-        }
+    }
 
-        // Remove the listener after it's been called to prevent multiple registrations
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+    public void LoadLogin()
+    {
+        LoginManager.instance.ResetLoginState();
+        Destroy(LoginManager.instance.gameObject);
+        Debug.Log("Se încarcă scena Login...");
+        SceneManager.LoadScene("Login");
     }
 }

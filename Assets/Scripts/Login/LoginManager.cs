@@ -18,9 +18,11 @@ public class LoginManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
+            Debug.Log("LoginManager instance created.");
         }
         else
         {
+            Debug.LogWarning("Duplicate LoginManager instance detected and destroyed.");
             Destroy(gameObject);
         }
     }
@@ -28,7 +30,20 @@ public class LoginManager : MonoBehaviour
     void Start()
     {
         userManager = FindObjectOfType<UserManager>();
+        Button loginButton = GameObject.Find("LoginButton")?.GetComponent<Button>();
+        if (loginButton != null)
+        {
+            loginButton.onClick.RemoveAllListeners(); // Elimină ascultătorii anteriori
+            loginButton.onClick.AddListener(OnLoginButtonClicked); // Adaugă metoda OnClick
+            Debug.Log("Login button OnClick reassigned.");
+        }
+        else
+        {
+            Debug.LogError("Login button not found in the scene.");
+        }
     }
+    
+
 
     public void Register()
     {
@@ -52,11 +67,10 @@ public class LoginManager : MonoBehaviour
 
         if (userManager.LoginUser(username, password, out UserProgress progress))
         {
-            LoginManager.instance.SetLoggedInUsername(username);
+            SetLoggedInUsername(username); // Setează utilizatorul logat
             Debug.Log($"User '{username}' logged in successfully.");
             messageText.text = $"Utilizatorul '{username}' a fost logat cu succes.";
             SceneManager.LoadScene("MainMenu");
-
         }
         else
         {
@@ -70,7 +84,14 @@ public class LoginManager : MonoBehaviour
         loggedInUsername = username;
         Debug.Log($"Logged-in user set to: {loggedInUsername}");
     }
-
+    public void ResetLoginState()
+    {
+        if (LoginManager.instance != null)
+        {
+            LoginManager.instance.SetLoggedInUsername(null);
+            Debug.Log("Login state reset.");
+        }
+    }
     public string GetLoggedInUsername()
     {
         return loggedInUsername;

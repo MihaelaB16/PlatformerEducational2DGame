@@ -11,8 +11,18 @@ public class PlayerDamage : MonoBehaviour
 
     private bool canDamage;
     private Vector3 initialPosition;
+
+    public static PlayerDamage instance;
     void Awake()
     {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
         lifeText = GameObject.Find("LifeText").GetComponent<Text>();
         lifeScoreCount = 3;
         lifeText.text = "x" + lifeScoreCount;
