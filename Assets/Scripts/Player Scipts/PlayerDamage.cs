@@ -13,6 +13,7 @@ public class PlayerDamage : MonoBehaviour
     private Vector3 initialPosition;
 
     public static PlayerDamage instance;
+    public string sceneName;
     void Awake()
     {
         if (instance == null)
@@ -122,8 +123,9 @@ public class PlayerDamage : MonoBehaviour
     IEnumerator RestartGame()
     {
         yield return new WaitForSecondsRealtime(2f); // Așteaptă 2 secunde în timp real
-        SceneManager.LoadScene("GamePlay"); // Reîncarcă scena "GamePlay"
+        SceneManager.LoadScene(sceneName); // Reîncarcă scena specificată
     }
+
 
     void OnTriggerEnter2D(Collider2D other)
     {

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -31,20 +31,39 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log($"Current logged-in user: {currentUser}");
         if (string.IsNullOrEmpty(currentUser))
         {
-            Debug.LogError("No logged-in user found. Cannot restore player position.");
+            Debug.LogError("No logged-in user found. Cannot restore player progress.");
             return;
         }
 
         string currentScene = SceneManager.GetActiveScene().name;
         if (string.IsNullOrEmpty(currentScene))
         {
-            Debug.LogError("Current scene name is null or empty. Cannot restore player position.");
+            Debug.LogError("Current scene name is null or empty. Cannot restore player progress.");
             return;
         }
 
-        Vector3 savedPosition = UserManager.instance.LoadPlayerPosition(currentUser, currentScene);
-        transform.position = savedPosition;
+        // Încarcă progresul complet
+        var progress = UserManager.instance.LoadPlayerProgress(currentUser, currentScene);
+
+        // Setează poziția
+        transform.position = progress.Position;
+
+        // Setează monedele în GameManager
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.scoreCount = progress.Coins;
+            if (GameManager.instance.coinTextScore != null)
+                GameManager.instance.coinTextScore.text = "x" + progress.Coins;
+        }
+
+        // Setează viețile în PlayerDamage
+        var playerDamage = GetComponent<PlayerDamage>();
+        if (playerDamage != null)
+        {
+            playerDamage.SetLives(progress.Lives);
+        }
     }
+
 
     // Update is called once per frame
     void Update()

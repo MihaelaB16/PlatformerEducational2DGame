@@ -23,8 +23,10 @@ public class MainMenuController : MonoBehaviour
     public void PlayGame(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
-        SceneManager.sceneLoaded += OnSceneLoaded;
+         SceneManager.sceneLoaded += OnSceneLoaded;
+        StartCoroutine(RestoreProgressAfterSceneLoad(sceneName));
     }
+
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -72,4 +74,14 @@ public class MainMenuController : MonoBehaviour
         Debug.Log("Se încarcă scena Login...");
         SceneManager.LoadScene("Login");
     }
+
+    private IEnumerator RestoreProgressAfterSceneLoad(string sceneName)
+    {
+        yield return new WaitUntil(() => SceneManager.GetActiveScene().name == sceneName);
+        yield return null; // așteaptă un frame pentru inițializare completă
+
+        string username = LoginManager.instance.GetLoggedInUsername();
+        UserManager.instance.RestoreProgressForScene(username, sceneName);
+    }
+
 }

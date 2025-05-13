@@ -413,6 +413,54 @@ public class UserManager : MonoBehaviour
         SaveUsers();
         Debug.Log($"Saved all progress for user '{currentUser}': Coins={coins}, Lives={lives}, Time={time}");
     }
+    public void RestoreProgressForScene(string username, string sceneName)
+    {
+        if (!users.ContainsKey(username))
+        {
+            Debug.LogWarning($"User '{username}' not found.");
+            return;
+        }
+
+        // Verifică explicit pentru GamePlay și GamePlayRomana
+        if (sceneName == "GamePlay" || sceneName == "GamePlayRomana")
+        {
+            if (!users[username].Progress.Scenes.ContainsKey(sceneName))
+            {
+                Debug.LogWarning($"No progress found for user '{username}' in scene '{sceneName}'.");
+                return;
+            }
+
+            SceneData sceneData = users[username].Progress.Scenes[sceneName];
+
+            // Restore coins
+            if (GameManager.instance != null)
+            {
+                GameManager.instance.scoreCount = sceneData.Coins;
+                if (GameManager.instance.coinTextScore != null)
+                    GameManager.instance.coinTextScore.text = "x" + sceneData.Coins;
+            }
+
+            // Restore lives and position
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                PlayerDamage playerDamage = player.GetComponent<PlayerDamage>();
+                if (playerDamage != null)
+                {
+                    playerDamage.SetLives(sceneData.Lives);
+                }
+                player.transform.position = sceneData.LastFlagPosition.ToVector3();
+            }
+            else
+            {
+                Debug.LogWarning("Player object not found in the scene.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"Scene '{sceneName}' is not handled for progress restoration.");
+        }
+    }
 
 
     // Add this method to UserManager.cs
@@ -461,6 +509,32 @@ public class UserManager : MonoBehaviour
             SaveUsers();
         }
     }
+
+    public PlayerProgressData LoadPlayerProgress(string username, string sceneName)
+    {
+        PlayerProgressData data = new PlayerProgressData
+        {
+            Position = Vector3.zero,
+            Coins = 0,
+            Lives = 3
+        };
+
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(sceneName))
+            return data;
+
+        if (users.ContainsKey(username) &&
+            users[username].Progress.Scenes != null &&
+            users[username].Progress.Scenes.ContainsKey(sceneName))
+        {
+            SceneData sceneData = users[username].Progress.Scenes[sceneName];
+            data.Position = sceneData.LastFlagPosition.ToVector3();
+            data.Coins = sceneData.Coins;
+            data.Lives = sceneData.Lives;
+        }
+        return data;
+    }
+
+
 }
 
 
@@ -509,7 +583,12 @@ public class SceneData
     }
 }
 
-
+public struct PlayerProgressData
+{
+    public Vector3 Position;
+    public int Coins;
+    public int Lives;
+}
 
 [System.Serializable]
 public class SerializableVector3

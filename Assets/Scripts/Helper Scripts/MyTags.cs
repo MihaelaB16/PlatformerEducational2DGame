@@ -17,6 +17,7 @@ public class MyTags : MonoBehaviour
     public static string WATER_TAG = "Water";
 
     public static string COIN_TAG = "Coin";
+    public static string LIFE_TAG = "bstar";
 
     public static string THORNS_TAG = "Thorns";
 

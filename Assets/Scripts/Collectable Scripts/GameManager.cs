@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance; // Singleton pentru acces global
     public int scoreCount = 0; // Scorul global
+    public int lifeCount = 3; // Numărul de vieți (poți inițializa cu valoarea dorită)
+    public Text lifeText;
     public Text coinTextScore; // Referința la textul UI pentru scor
     private float sessionStartTime;
     public float currentSessionTime;
@@ -35,6 +37,8 @@ public class GameManager : MonoBehaviour
         // Găsește și inițializează CoinsText
         coinTextScore = GameObject.Find("CoinsText").GetComponent<Text>();
         coinTextScore.text = "x" + scoreCount;
+        lifeText = GameObject.Find("LifeText").GetComponent<Text>();
+        lifeText.text = "x" + lifeCount;
         sessionStartTime = Time.time;
     }
 
@@ -52,6 +56,22 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("✅ Scor nou: " + scoreCount);
         coinTextScore.text = "x" + scoreCount;
+    }
+    public void AddLife(int amount)
+    {
+        Debug.Log("🔄 AddLife() apelată! Modific viețile cu: " + amount);
+
+        lifeCount += amount;
+
+        if (lifeCount <= 0)
+        {
+            Debug.Log("⚠️ Viețile au ajuns la 0 sau mai puțin. Resetare la 0.");
+            lifeCount = 0;
+        }
+
+        Debug.Log("✅ Vieți noi: " + lifeCount);
+        if (lifeText != null)
+            lifeText.text = "x" + lifeCount;
     }
     void Update()
     {

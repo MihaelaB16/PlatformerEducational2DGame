@@ -16,6 +16,7 @@ TagManager:
   - Thorns
   - subway1
   - subway2
+  - bstar
   layers:
   - Default
   - TransparentFX

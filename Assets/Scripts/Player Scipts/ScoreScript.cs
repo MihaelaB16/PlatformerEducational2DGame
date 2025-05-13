@@ -36,6 +36,16 @@ public class ScoreScript : MonoBehaviour
 
             StartCoroutine(ReappearCoinAfterTime(target.gameObject, coinRespawnTime)); // 60f = 60 secunde
         }
+        if (target.tag == MyTags.LIFE_TAG)
+        {
+            audioManager.Play();
+            target.gameObject.SetActive(false);
+            //scoreCount++;
+            //coinTextScore.text = "x" + scoreCount;
+            // Actualizăm scorul prin GameManager
+            GameManager.instance.AddLife(1);
+
+        }
     }
 
     IEnumerator ReappearCoinAfterTime(GameObject coin, float delay)
