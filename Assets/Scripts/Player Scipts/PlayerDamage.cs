@@ -6,14 +6,15 @@ using UnityEngine.SceneManagement;
 
 public class PlayerDamage : MonoBehaviour
 {
-    private Text lifeText;
-    private int lifeScoreCount;
-
-    private bool canDamage;
-    private Vector3 initialPosition;
 
     public static PlayerDamage instance;
+    private Text lifeText;
+    [SerializeField] private int lives = 3;
+
+    private Vector3 initialPosition;
+
     public string sceneName;
+    private bool canDamage = true;
     void Awake()
     {
         if (instance == null)
@@ -25,11 +26,9 @@ public class PlayerDamage : MonoBehaviour
             Destroy(gameObject);
         }
         lifeText = GameObject.Find("LifeText").GetComponent<Text>();
-        lifeScoreCount = 3;
-        lifeText.text = "x" + lifeScoreCount;
 
-        canDamage = true;
         initialPosition = transform.position;
+        
 
     }
     void Start()
@@ -40,16 +39,17 @@ public class PlayerDamage : MonoBehaviour
     // Update is called once per frame
     public void DealDamage()
     {
+        if (!canDamage) return;
         if (canDamage)
         {
-            
-            lifeScoreCount--;
-            if (lifeScoreCount > 0)
+
+            lives--;
+            if (lives > 0)
             {
                 
                 Time.timeScale = 0f;
                 StartCoroutine(ReturnToFlag());
-                lifeText.text = "x" + lifeScoreCount;
+                UpdateLifeUI();
             }
             else
             {
@@ -58,7 +58,7 @@ public class PlayerDamage : MonoBehaviour
                 Time.timeScale = 0f;
                 StartCoroutine(RestartGame());
             }
-            
+            UserManager.instance.SaveProgressData();
             canDamage = false;
 
             StartCoroutine(WaitForDamage());
@@ -87,7 +87,7 @@ public class PlayerDamage : MonoBehaviour
 
         // Restaurăm fundalul curent sau setăm fundalul inițial
         GameObject background = GameObject.Find("Background");
-        GameObject background2 = GameObject.Find("Background");
+        GameObject background2 = GameObject.Find("Background2");
 
         if (FlagController.currentBackground != null)
         {
@@ -96,12 +96,12 @@ public class PlayerDamage : MonoBehaviour
             if (FlagController.currentBackground == background)
             {
                 background.SetActive(true);
-                if (background2 != null) background2.SetActive(false);
+                background2.SetActive(false);
             }
             else if (FlagController.currentBackground == background2)
             {
                 background2.SetActive(true);
-                if (background != null) background.SetActive(false);
+                background.SetActive(false);
             }
         }
         else
@@ -110,38 +110,66 @@ public class PlayerDamage : MonoBehaviour
             if (background != null)
             {
                 background.SetActive(true);
-                if (background2 != null) background2.SetActive(false);
+                background2.SetActive(false);
                 FlagController.currentBackground = background; // Setăm currentBackground la fundalul inițial
                 Debug.Log("Restaurăm fundalul inițial: " + background.name);
             }
         }
-        //lifeScoreCount = 3; // Resetăm viața
-        lifeText.text = "x" + lifeScoreCount;
-        Time.timeScale = 1f;
+        UpdateLifeUI();
     }
 
     IEnumerator RestartGame()
     {
         yield return new WaitForSecondsRealtime(2f); // Așteaptă 2 secunde în timp real
+        UserManager.instance.ResetProgressForCurrentScene(
+            new Vector3(-10.0f, -3.0f, 0.0f), 
+            0,                               
+            3,                                 
+            0.0f                             
+        );
+
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.ResetGameplayTime();
+        }
         SceneManager.LoadScene(sceneName); // Reîncarcă scena specificată
     }
 
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D collision)
     {
-        if (other.CompareTag(MyTags.WATER_TAG) || other.CompareTag(MyTags.THORNS_TAG))
+        if (collision.CompareTag(MyTags.WATER_TAG) || collision.CompareTag(MyTags.THORNS_TAG))
         {
             DealDamage();
+        }
+        else if (collision.CompareTag(MyTags.LIFE_TAG))
+        {
+            GameManager.instance.AddLife(1);
+
+            // Dacă vrei să salvezi imediat progresul:
+            string currentUser = LoginManager.instance?.GetLoggedInUsername();
+            if (!string.IsNullOrEmpty(currentUser))
+            {
+                UserManager.instance.UpdateLives(GetLives()); // Salvează progresul local și în JSON
+            }
+            UserManager.instance.SaveProgressData();
+            Destroy(collision.gameObject);
         }
     }
     public int GetLives()
     {
-        return lifeScoreCount;
+        return lives;
     }
-    public void SetLives(int lives)
+    public void SetLives(int value)
     {
-        lifeScoreCount = lives;
-        lifeText.text = "x" + lifeScoreCount;
+        lives = value;
+        UpdateLifeUI();
+    }
+
+    public void UpdateLifeUI()
+    {
+        
+        lifeText.text = "x" + lives;
     }
 }//class
 

@@ -18485,6 +18485,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8df25c0aa2b9434fb0a1fe4242421fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lives: 3
   sceneName: GamePlayRomana
 --- !u!1 &851360340
 GameObject:
@@ -24461,8 +24462,8 @@ Transform:
   m_GameObject: {fileID: 1084761662}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.0112, y: -0.2186, z: 10}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 0.054, y: 0.0147, z: 10}
+  m_LocalScale: {x: 1.0019206, y: 1.0306374, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 519420032}
@@ -24508,7 +24509,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: cd8ad66371ce467428dee0bb1f951426, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 375f9e20c7b3be7478e70acd5d11536b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -30421,7 +30422,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 9a90a9452964ff74b9b91a6689786379, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6039b97daf3b26241b08e91752dbea29, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -30441,8 +30442,8 @@ Transform:
   m_GameObject: {fileID: 1298750265}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0096, y: -0.1816, z: 10}
-  m_LocalScale: {x: 1.8857789, y: 1.8723819, z: 1}
+  m_LocalPosition: {x: 0.0701, y: -0.1459, z: 10}
+  m_LocalScale: {x: 1.243323, y: 1.1052186, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 519420032}

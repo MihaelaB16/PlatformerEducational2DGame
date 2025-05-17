@@ -10,10 +10,6 @@ public class UserManager : MonoBehaviour
     private string userFilePath;
     private Dictionary<string, UserData> users;
 
-    private float currentSessionTime = 0f;
-    private float jsonTimeGamePlay = 0f;
-    private float jsonTimeGamePlayRomana = 0f;
-
     private string currentSceneName;
     private Dictionary<string, float> sessionTimesPerScene = new Dictionary<string, float>();
 
@@ -37,8 +33,6 @@ public class UserManager : MonoBehaviour
 
     void Update()
     {
-        currentSessionTime += Time.deltaTime; // Increment session time
-
         string sceneName = SceneManager.GetActiveScene().name;
         currentSceneName = sceneName;
 
@@ -118,17 +112,16 @@ public class UserManager : MonoBehaviour
             GameManager.instance.ResetGameplayTime();
         }
 
-        // Initialize time variables
-        if (currentScene == "GamePlay")
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
         {
-            jsonTimeGamePlay = sceneData.Time;
-        }
-        else if (currentScene == "GamePlayRomana")
-        {
-            jsonTimeGamePlayRomana = sceneData.Time;
+            PlayerDamage playerDamage = player.GetComponent<PlayerDamage>();
+            if (playerDamage != null)
+            {
+                playerDamage.SetLives(sceneData.Lives); // ✅ adaugă această linie
+            }
         }
 
-        currentSessionTime = 0f; // Reset session time
     }
 
 
@@ -265,7 +258,6 @@ public class UserManager : MonoBehaviour
         }
 
         string currentScene = SceneManager.GetActiveScene().name;
-
         if (!users[currentUser].Progress.Scenes.ContainsKey(currentScene))
         {
             users[currentUser].Progress.Scenes[currentScene] = new SceneData();
@@ -292,16 +284,11 @@ public class UserManager : MonoBehaviour
                 UpdateLives(currentLives); // Update total lives
             }
         }
-
         // Calculate total time for the current scene
         float totalTimeForCurrentScene = sessionTimesPerScene.ContainsKey(currentScene)
             ? sessionTimesPerScene[currentScene]
             : 0f;
 
-        if (currentScene == "GamePlay")
-            totalTimeForCurrentScene += jsonTimeGamePlay;
-        else if (currentScene == "GamePlayRomana")
-            totalTimeForCurrentScene += jsonTimeGamePlayRomana;
 
         // Save the total time in JSON for the current scene
         users[currentUser].Progress.Scenes[currentScene].Time = totalTimeForCurrentScene;
@@ -465,7 +452,7 @@ public class UserManager : MonoBehaviour
                 PlayerDamage playerDamage = player.GetComponent<PlayerDamage>();
                 if (playerDamage != null)
                 {
-                    playerDamage.SetLives(sceneData.Lives);
+                    playerDamage.SetLives(sceneData.Lives); // <-- AICI setezi viețile corect!
                 }
                 player.transform.position = sceneData.LastFlagPosition.ToVector3();
             }
@@ -516,10 +503,6 @@ public class UserManager : MonoBehaviour
     public void LogoutUser()
     {
         Debug.Log("Logging out the current user and resetting state.");
-        currentSessionTime = 0f;
-        jsonTimeGamePlay = 0f;
-        jsonTimeGamePlayRomana = 0f;
-
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (!string.IsNullOrEmpty(currentUser) && users.ContainsKey(currentUser))
         {
@@ -551,7 +534,24 @@ public class UserManager : MonoBehaviour
         }
         return data;
     }
+    public void ResetProgressForCurrentScene(Vector3 initialPosition, int initialCoins, int initialLives, float initialTime)
+    {
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        string currentScene = SceneManager.GetActiveScene().name;
+        if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
+            return;
 
+        if (!users[currentUser].Progress.Scenes.ContainsKey(currentScene))
+            users[currentUser].Progress.Scenes[currentScene] = new SceneData();
+
+        var sceneData = users[currentUser].Progress.Scenes[currentScene];
+        sceneData.LastFlagPosition = new SerializableVector3(initialPosition);
+        sceneData.Coins = initialCoins;
+        sceneData.Lives = initialLives;
+        sceneData.Time = initialTime;
+
+        SaveUsers();
+    }
 
 }
 

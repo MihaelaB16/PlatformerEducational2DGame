@@ -25198,6 +25198,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8df25c0aa2b9434fb0a1fe4242421fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lives: 3
   sceneName: GamePlay
 --- !u!1 &841269536
 GameObject:

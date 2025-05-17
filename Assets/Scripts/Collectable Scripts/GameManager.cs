@@ -37,8 +37,8 @@ public class GameManager : MonoBehaviour
         // Găsește și inițializează CoinsText
         coinTextScore = GameObject.Find("CoinsText").GetComponent<Text>();
         coinTextScore.text = "x" + scoreCount;
-        lifeText = GameObject.Find("LifeText").GetComponent<Text>();
-        lifeText.text = "x" + lifeCount;
+        //lifeText = GameObject.Find("LifeText").GetComponent<Text>();
+        //lifeText.text = "x" + lifeCount;
         sessionStartTime = Time.time;
     }
 
@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("🔄 AddLife() apelată! Modific viețile cu: " + amount);
 
         lifeCount += amount;
-
+    
         if (lifeCount <= 0)
         {
             Debug.Log("⚠️ Viețile au ajuns la 0 sau mai puțin. Resetare la 0.");

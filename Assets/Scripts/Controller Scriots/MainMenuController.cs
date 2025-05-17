@@ -23,7 +23,7 @@ public class MainMenuController : MonoBehaviour
     public void PlayGame(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
-         SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneLoaded += OnSceneLoaded;
         StartCoroutine(RestoreProgressAfterSceneLoad(sceneName));
     }
 
