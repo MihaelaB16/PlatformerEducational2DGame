@@ -25,6 +25,11 @@ public class QuizManager : MonoBehaviour
 
     public TextAsset questionsFile; // Obiect JSON atribuit în Unity
 
+    private int rightAnswer = 0;
+    private int wrongAnswer = 0;
+
+    public string currentLevel;
+
 
     void Start()
     {
@@ -194,6 +199,8 @@ public class QuizManager : MonoBehaviour
 
         if (index == currentQuestion.correctAnswer)
         {
+            rightAnswer++;
+            Debug.Log($"Răspuns corect! rightAnswer: {rightAnswer}, wrongAnswer: {wrongAnswer}");
             GameManager.instance.AddScore(5);
             if (collectCoinsButton != null)
             {
@@ -214,6 +221,8 @@ public class QuizManager : MonoBehaviour
         }
         else
         {
+            wrongAnswer++;
+            Debug.Log($"Răspuns greșit! rightAnswer: {rightAnswer}, wrongAnswer: {wrongAnswer}");
             GameManager.instance.AddScore(-5);
 
             if (GameManager.instance.scoreCount < 0)
@@ -229,6 +238,38 @@ public class QuizManager : MonoBehaviour
             CheckGameOver();
             // Nu mai trecem la altă întrebare până nu răspunde corect
             Debug.Log("Răspuns greșit. Reîncearcă aceeași întrebare.");
+        }
+        // Example usage in QuizManager.cs after rightAnswer++ or wrongAnswer++
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+
+        if (!string.IsNullOrEmpty(currentUser))
+        {
+            var userProgress = UserManager.instance.GetCurrentUserProgress();
+            if (userProgress != null && userProgress.Scenes.ContainsKey(currentScene))
+            {
+                var sceneData = userProgress.Scenes[currentScene];
+                LevelStats levelStats = null;
+                if (currentLevel == "Level1") levelStats = sceneData.Level1;
+                else if (currentLevel == "Level2") levelStats = sceneData.Level2;
+
+                if (levelStats != null)
+                {
+                    levelStats.rightAnswer = rightAnswer;
+                    levelStats.wrongAnswer = wrongAnswer;
+                }
+
+                // Update global sums
+                userProgress.rightAnswer = 0;
+                userProgress.wrongAnswer = 0;
+                foreach (var scene in userProgress.Scenes.Values)
+                {
+                    userProgress.rightAnswer += scene.Level1.rightAnswer + scene.Level2.rightAnswer;
+                    userProgress.wrongAnswer += scene.Level1.wrongAnswer + scene.Level2.wrongAnswer;
+                }
+
+                UserManager.instance.SaveProgress(currentUser, userProgress);
+            }
         }
 
         // Reset the flag after a short delay
@@ -379,4 +420,11 @@ public class Question
         answers = a;
         correctAnswer = correct;
     }
+}
+
+[System.Serializable]
+public class LevelStats
+{
+    public int rightAnswer = 0;
+    public int wrongAnswer = 0;
 }

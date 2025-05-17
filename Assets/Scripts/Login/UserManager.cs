@@ -14,6 +14,9 @@ public class UserManager : MonoBehaviour
     private float jsonTimeGamePlay = 0f;
     private float jsonTimeGamePlayRomana = 0f;
 
+    private string currentSceneName;
+    private Dictionary<string, float> sessionTimesPerScene = new Dictionary<string, float>();
+
 
     private void Awake()
     {
@@ -35,6 +38,14 @@ public class UserManager : MonoBehaviour
     void Update()
     {
         currentSessionTime += Time.deltaTime; // Increment session time
+
+        string sceneName = SceneManager.GetActiveScene().name;
+        currentSceneName = sceneName;
+
+        if (!sessionTimesPerScene.ContainsKey(sceneName))
+            sessionTimesPerScene[sceneName] = 0f;
+
+        sessionTimesPerScene[sceneName] += Time.deltaTime;
     }
 
 
@@ -78,6 +89,14 @@ public class UserManager : MonoBehaviour
         }
 
         string currentScene = SceneManager.GetActiveScene().name;
+        currentSceneName = currentScene;
+
+        float previousTime = 0f;
+        if (users[username].Progress.Scenes.ContainsKey(currentScene))
+            previousTime = users[username].Progress.Scenes[currentScene].Time;
+
+        sessionTimesPerScene[currentScene] = 0f; // Start fresh for this session
+
 
         if (!users[username].Progress.Scenes.ContainsKey(currentScene))
         {
@@ -275,15 +294,14 @@ public class UserManager : MonoBehaviour
         }
 
         // Calculate total time for the current scene
-        float totalTimeForCurrentScene = currentSessionTime;
+        float totalTimeForCurrentScene = sessionTimesPerScene.ContainsKey(currentScene)
+            ? sessionTimesPerScene[currentScene]
+            : 0f;
+
         if (currentScene == "GamePlay")
-        {
             totalTimeForCurrentScene += jsonTimeGamePlay;
-        }
         else if (currentScene == "GamePlayRomana")
-        {
             totalTimeForCurrentScene += jsonTimeGamePlayRomana;
-        }
 
         // Save the total time in JSON for the current scene
         users[currentUser].Progress.Scenes[currentScene].Time = totalTimeForCurrentScene;
@@ -553,6 +571,8 @@ public class UserProgress
     public int Coins;
     public int Lives;
     public float Time;
+    public int rightAnswer = 0; // sum of all levels
+    public int wrongAnswer = 0;
     public List<string> AnsweredQuestions;
 
     public UserProgress()
@@ -572,6 +592,9 @@ public class SceneData
     public int Lives;
     public float Time;
     public List<string> AnsweredQuestions;
+
+    public LevelStats Level1 = new LevelStats();
+    public LevelStats Level2 = new LevelStats();
 
     public SceneData()
     {

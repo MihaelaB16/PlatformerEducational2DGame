@@ -70,8 +70,8 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("✅ Vieți noi: " + lifeCount);
-        if (lifeText != null)
-            lifeText.text = "x" + lifeCount;
+        
+        lifeText.text = "x" + lifeCount;
     }
     void Update()
     {
