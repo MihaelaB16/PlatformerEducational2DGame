@@ -26,7 +26,7 @@ public class FlagController : MonoBehaviour
         }
         if (nextBackground == null)
         {
-            nextBackground = GameObject.Find("Background");
+            nextBackground = GameObject.Find("Background2");
             Debug.Log("nextBackground nu a fost setat, folosim implicit: " + nextBackground.name);
         }
 

@@ -44,7 +44,7 @@ public class PlayerDamage : MonoBehaviour
         {
 
             lives--;
-            if (lives > 0)
+            if (lives >= 0)
             {
                 
                 Time.timeScale = 0f;

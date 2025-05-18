@@ -61,17 +61,10 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("🔄 AddLife() apelată! Modific viețile cu: " + amount);
 
-        lifeCount += amount;
-    
-        if (lifeCount <= 0)
+        if (PlayerDamage.instance != null)
         {
-            Debug.Log("⚠️ Viețile au ajuns la 0 sau mai puțin. Resetare la 0.");
-            lifeCount = 0;
+            PlayerDamage.instance.SetLives(PlayerDamage.instance.GetLives() + amount);
         }
-
-        Debug.Log("✅ Vieți noi: " + lifeCount);
-        
-        lifeText.text = "x" + lifeCount;
     }
     void Update()
     {
