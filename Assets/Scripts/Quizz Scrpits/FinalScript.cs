@@ -38,13 +38,16 @@ public class FinalScript : MonoBehaviour
         // Display the values from the current scene's progress
         coinsText.text = "" + sceneData.Coins;
 
-        // Sumează valorile din Level1 și Level2
-        rightAnswersText.text = "x" + (sceneData.Level1.rightAnswer + sceneData.Level2.rightAnswer);
+        // Afișează numărul total de răspunsuri corecte din prima încercare
+        int firstAttemptCorrect = sceneData.Level1.firstAttemptRightAnswer + sceneData.Level2.firstAttemptRightAnswer;
+        rightAnswersText.text = "x" + firstAttemptCorrect;
+
+        // Afișează numărul total de răspunsuri greșite
         wrongAnswersText.text = "x" + (sceneData.Level1.wrongAnswer + sceneData.Level2.wrongAnswer);
 
         Debug.Log($"Displaying stats for user '{username}' in scene '{currentScene}': " +
                   $"Coins={sceneData.Coins}, " +
-                  $"Correct={sceneData.Level1.rightAnswer + sceneData.Level2.rightAnswer}, " +
+                  $"First Attempt Correct={firstAttemptCorrect}, " +
                   $"Wrong={sceneData.Level1.wrongAnswer + sceneData.Level2.wrongAnswer}");
     }
 

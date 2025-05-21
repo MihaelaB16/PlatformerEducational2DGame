@@ -5,11 +5,12 @@ using System.IO;
 
 public class QuizManager : MonoBehaviour
 {
-    
     public Image questionImage;
+    public GameObject imageQuestion;
     public Button[] answerButtons;
     public GameObject quizCanvas;
     public GameObject continueButton;
+    public GameObject btnBack;
     public GameObject backgroundOverlay; // Referință la panelul de umbrire
 
     private List<Question> questions = new List<Question>();
@@ -17,23 +18,24 @@ public class QuizManager : MonoBehaviour
 
     public CollectCoinsButton collectCoinsButton; // Referință directă
 
-
     public GameObject coliderLeftCheckpoint; // Collider stânga
     public GameObject coliderRightCheckpoint; // Collider dreapta
 
     private int questionCounter; // Mutat aici ca să fie clar
 
     public TextAsset questionsFile; // Obiect JSON atribuit în Unity
-
+    public GameObject noCoinsMessage;
     private int rightAnswer = 0;
     private int wrongAnswer = 0;
 
     public string currentLevel;
 
+    // Adăugat pentru urmărirea întrebărilor încercate
+    private HashSet<int> attemptedQuestionIndices = new HashSet<int>();
+    private int currentQuestionId = 0;
 
     void Start()
     {
-
         questionCounter = 6; // Resetăm contorul când începe quiz-ul
         LoadQuestionsFromJSON();
         ShuffleQuestions();
@@ -43,16 +45,11 @@ public class QuizManager : MonoBehaviour
         {
             continueButton.SetActive(false); // Ascundem butonul Continue la start
         }
+
+        // Resetăm HashSet-ul la început
+        attemptedQuestionIndices.Clear();
     }
 
-
-    //void LoadQuestions()
-    //{
-    //    questions.Add(new Question("Care este capitala Franței?", new string[] { "Paris", "Londra", "Madrid", "Berlin" }, 0));
-    //    questions.Add(new Question("Cât face 5 + 3?", new string[] { "6", "8", "7", "9" }, 1));
-    //    questions.Add(new Question("Cel mai mare ocean este?", new string[] { "Pacific", "Atlantic", "Indian", "Arctic" }, 0));
-    //    Debug.Log("Întrebări încărcate: " + questions.Count);  // Debugging pentru a verifica numărul de întrebări
-    //}
     void LoadQuestionsFromJSON()
     {
         if (questionsFile != null)
@@ -89,7 +86,6 @@ public class QuizManager : MonoBehaviour
         public QuestionData[] items;
     }
 
-
     public static class JsonHelper
     {
         public static T[] FromJson<T>(string json)
@@ -105,7 +101,6 @@ public class QuizManager : MonoBehaviour
             public T[] items;
         }
     }
-
 
     void ShuffleQuestions()
     {
@@ -129,6 +124,9 @@ public class QuizManager : MonoBehaviour
             int randomIndex = Random.Range(0, questions.Count);
             currentQuestion = questions[randomIndex];
             questions.RemoveAt(randomIndex);
+
+            // Generează un ID unic pentru întrebarea curentă
+            currentQuestionId = currentQuestion.GetHashCode();
 
             // Afișează imaginea întrebării
             questionImage.sprite = currentQuestion.question;
@@ -182,7 +180,6 @@ public class QuizManager : MonoBehaviour
         }
     }
 
-
     private bool isProcessingAnswer = false;  // Add this variable at the class level
 
     public void CheckAnswer(int index)
@@ -197,10 +194,41 @@ public class QuizManager : MonoBehaviour
         isProcessingAnswer = true;
         Debug.Log("CheckAnswer apelat! Index: " + index);
 
+        string currentUser = LoginManager.instance?.GetLoggedInUsername();
+        string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+
         if (index == currentQuestion.correctAnswer)
         {
             rightAnswer++;
             Debug.Log($"Răspuns corect! rightAnswer: {rightAnswer}, wrongAnswer: {wrongAnswer}");
+
+            // Verifică dacă este prima încercare pentru această întrebare
+            if (!attemptedQuestionIndices.Contains(currentQuestionId))
+            {
+                // Este prima încercare și răspunsul este corect!
+                if (!string.IsNullOrEmpty(currentUser))
+                {
+                    var userProgress = UserManager.instance.GetCurrentUserProgress();
+                    if (userProgress != null && userProgress.Scenes.ContainsKey(currentScene))
+                    {
+                        var sceneData = userProgress.Scenes[currentScene];
+                        LevelStats levelStats = null;
+
+                        if (currentLevel == "Level1") levelStats = sceneData.Level1;
+                        else if (currentLevel == "Level2") levelStats = sceneData.Level2;
+
+                        if (levelStats != null)
+                        {
+                            levelStats.firstAttemptRightAnswer++;
+                            Debug.Log($"Răspuns corect din prima încercare! firstAttemptRightAnswer incrementat la: {levelStats.firstAttemptRightAnswer}");
+                        }
+
+                        // Salvează progresul
+                        UserManager.instance.SaveProgress(currentUser, userProgress);
+                    }
+                }
+            }
+
             GameManager.instance.AddScore(5);
             if (collectCoinsButton != null)
             {
@@ -221,6 +249,9 @@ public class QuizManager : MonoBehaviour
         }
         else
         {
+            // Marchează această întrebare ca fiind încercată
+            attemptedQuestionIndices.Add(currentQuestionId);
+
             wrongAnswer++;
             Debug.Log($"Răspuns greșit! rightAnswer: {rightAnswer}, wrongAnswer: {wrongAnswer}");
             GameManager.instance.AddScore(-5);
@@ -239,10 +270,8 @@ public class QuizManager : MonoBehaviour
             // Nu mai trecem la altă întrebare până nu răspunde corect
             Debug.Log("Răspuns greșit. Reîncearcă aceeași întrebare.");
         }
-        // Example usage in QuizManager.cs after rightAnswer++ or wrongAnswer++
-        string currentUser = LoginManager.instance?.GetLoggedInUsername();
-        string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
 
+        // Actualizarea valorilor în LevelStats pentru user progress
         if (!string.IsNullOrEmpty(currentUser))
         {
             var userProgress = UserManager.instance.GetCurrentUserProgress();
@@ -250,6 +279,7 @@ public class QuizManager : MonoBehaviour
             {
                 var sceneData = userProgress.Scenes[currentScene];
                 LevelStats levelStats = null;
+
                 if (currentLevel == "Level1") levelStats = sceneData.Level1;
                 else if (currentLevel == "Level2") levelStats = sceneData.Level2;
 
@@ -281,7 +311,6 @@ public class QuizManager : MonoBehaviour
         isProcessingAnswer = false;
     }
 
-
     // Activează butonul Continue la final
     void ShowContinueButton()
     {
@@ -292,7 +321,6 @@ public class QuizManager : MonoBehaviour
                 btn.gameObject.SetActive(false);
             }
 
-           
             if (questionImage != null)
             {
                 questionImage.gameObject.SetActive(false);
@@ -315,9 +343,6 @@ public class QuizManager : MonoBehaviour
         }
     }
 
-
-
-
     void CheckGameOver()
     {
         Debug.Log("CheckGameOver() apelată! Scor curent: " + GameManager.instance.scoreCount);
@@ -329,6 +354,10 @@ public class QuizManager : MonoBehaviour
             GameManager.instance.scoreCount = 0;
             GameManager.instance.coinTextScore.text = "x0";
 
+            if (imageQuestion != null)
+            {
+                imageQuestion.SetActive(false);
+            }
             // Dezactivare butoane răspuns
             foreach (Button btn in answerButtons)
             {
@@ -340,7 +369,11 @@ public class QuizManager : MonoBehaviour
             {
                 continueButton.SetActive(false);
             }
-
+            if (noCoinsMessage != null)
+            {
+                noCoinsMessage.SetActive(true);
+                Debug.Log("NoCoinsMessage activat direct prin referință!");
+            }
             // Dezactivare butoane manual (dacă sunt create separat și nu în `answerButtons`)
             GameObject.Find("Button_question1")?.SetActive(false);
             GameObject.Find("Button_question2")?.SetActive(false);
@@ -350,15 +383,9 @@ public class QuizManager : MonoBehaviour
             //  GameObject.Find("BackGroundQuiz")?.SetActive(false);
 
             // Activare buton "Button_back"
-            GameObject buttonBack = GameObject.Find("Button_back");
-            if (buttonBack != null)
+            if (btnBack != null)
             {
-                Debug.Log("Butonul 'Button_back' a fost găsit și activat!");
-                buttonBack.SetActive(true);
-            }
-            else
-            {
-                Debug.LogError("Eroare: 'Button_back' nu a fost găsit!");
+                btnBack.SetActive(true);
             }
 
             // Asigură-te că UI-ul este actualizat corect
@@ -366,13 +393,11 @@ public class QuizManager : MonoBehaviour
         }
     }
 
-
     void EnsureUIUpdated()
     {
         GameManager.instance.coinTextScore.text = "x0";
         Debug.Log("UI actualizat forțat: " + GameManager.instance.coinTextScore.text);
     }
-
 
     public void ContinueGame()
     {
@@ -397,14 +422,12 @@ public class QuizManager : MonoBehaviour
         Debug.Log("🎉 Quiz finalizat! Jocul continuă.");
     }
 
-
     public void OnBackButtonPressed()
     {
         Debug.Log(" Dezactivez ColiderLeftCheckpoint și închid quiz-ul!");
         coliderLeftCheckpoint.SetActive(false); // Dezactivează coliderul stânga
         quizCanvas.SetActive(false); // Închide quiz-ul
     }
-
 }
 
 [System.Serializable]
@@ -427,4 +450,5 @@ public class LevelStats
 {
     public int rightAnswer = 0;
     public int wrongAnswer = 0;
+    public int firstAttemptRightAnswer = 0;
 }

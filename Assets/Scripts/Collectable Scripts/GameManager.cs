@@ -9,9 +9,14 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance; // Singleton pentru acces global
     public int scoreCount = 0; // Scorul global
+
     public int lifeCount = 3; // Numărul de vieți (poți inițializa cu valoarea dorită)
     public Text lifeText;
     public Text coinTextScore; // Referința la textul UI pentru scor
+
+    public Text quizCoinTextScore;
+    public Text quizLifeText;
+
     private float sessionStartTime;
     public float currentSessionTime;
 
@@ -55,15 +60,25 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log("✅ Scor nou: " + scoreCount);
-        coinTextScore.text = "x" + scoreCount;
+
+        // Actualizează toate textele UI
+        if (coinTextScore != null)
+            coinTextScore.text = "x" + scoreCount;
+
+        if (quizCoinTextScore != null)
+            quizCoinTextScore.text = "x" + scoreCount;
     }
     public void AddLife(int amount)
     {
-        Debug.Log("🔄 AddLife() apelată! Modific viețile cu: " + amount);
-
         if (PlayerDamage.instance != null)
         {
             PlayerDamage.instance.SetLives(PlayerDamage.instance.GetLives() + amount);
+
+            // Actualizează și textul din QuizCanvas dacă există
+            if (quizLifeText != null)
+            {
+                quizLifeText.text = "x" + PlayerDamage.instance.GetLives();
+            }
         }
     }
     void Update()
@@ -186,6 +201,33 @@ public class GameManager : MonoBehaviour
         Debug.Log("Se încarcă scena MainMenu...");
         SceneManager.LoadScene("MainMenu");
     }
-  
+    public void RefreshUIReferences()
+    {
+        // Actualizează referințele pentru HUD principal
+        coinTextScore = GameObject.Find("CoinsText")?.GetComponent<Text>();
+        if (coinTextScore != null)
+        {
+            coinTextScore.text = "x" + scoreCount;
+        }
+
+        lifeText = GameObject.Find("LifeText")?.GetComponent<Text>();
+        if (lifeText != null)
+        {
+            lifeText.text = "x" + lifeCount;
+        }
+
+        // Actualizează referințele pentru QuizCanvas
+        quizCoinTextScore = GameObject.Find("QuizCoinsText")?.GetComponent<Text>();
+        if (quizCoinTextScore != null)
+        {
+            quizCoinTextScore.text = "x" + scoreCount;
+        }
+
+        quizLifeText = GameObject.Find("QuizLifeText")?.GetComponent<Text>();
+        if (quizLifeText != null)
+        {
+            quizLifeText.text = "x" + lifeCount;
+        }
+    }
 
 }
