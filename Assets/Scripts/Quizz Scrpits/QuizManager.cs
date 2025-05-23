@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.IO;
+using System.Collections;
 
 public class QuizManager : MonoBehaviour
 {
@@ -38,12 +39,21 @@ public class QuizManager : MonoBehaviour
     private int consecutiveCorrectAnswers = 0;
     private int[] bonusPoints = { 5, 10, 15, 20, 30, 50 }; // Punctele pentru fiecare răspuns consecutiv
 
+    [Header("Bonus Display")]
+    public Text bonusText; // Referință către Text UI pentru afișarea bonusului
+    public Text bonusLifeText;
+    public float bonusDisplayTime = 0.1f; // Timpul de afișare al bonusului în secunde
+
     void Start()
     {
         questionCounter = 6; // Resetăm contorul când începe quiz-ul
         consecutiveCorrectAnswers = 0;
         LoadQuestionsFromJSON();
         ShuffleQuestions();
+
+        HideBonusMessage();
+        HideLifeBonusMessage();
+
         DisplayNextQuestion();
 
         if (continueButton != null)
@@ -224,11 +234,18 @@ public class QuizManager : MonoBehaviour
             // Verifică dacă este al 6-lea răspuns consecutiv (sau multiplu de 6)
             bool shouldAddLife = (consecutiveCorrectAnswers % 6 == 0);
 
+            string bonusMessage = $"+{bonusToAdd} monezi";
             if (shouldAddLife)
             {
                 Debug.Log("🎉 6 răspunsuri consecutive corecte! Primești o viață bonus!");
                 GameManager.instance.AddLife(1);
+
+                // Afișează separat bonusul pentru viață
+                ShowLifeBonusMessage("+1 viață");
             }
+
+            // Afișează bonusul primit pentru puncte
+            ShowBonusMessage(bonusMessage);
 
             rightAnswer++;
             Debug.Log($"Răspuns corect! rightAnswer: {rightAnswer}, wrongAnswer: {wrongAnswer}");
@@ -270,6 +287,7 @@ public class QuizManager : MonoBehaviour
 
             CheckGameOver();
 
+            // Treci IMEDIAT la următoarea întrebare - nu aștepta după bonus
             if (questions.Count > 0 && questionCounter > 0)
             {
                 DisplayNextQuestion();
@@ -277,7 +295,7 @@ public class QuizManager : MonoBehaviour
             else if (questionCounter == 0)
             {
                 Debug.Log("Ultima întrebare a fost răspunsă corect! Afișez butonul Continue.");
-                Invoke("ShowContinueButton", 0.5f);
+                ShowContinueButton();
             }
         }
         else
@@ -285,6 +303,9 @@ public class QuizManager : MonoBehaviour
             // RĂSPUNS GREȘIT - Resetează contorul de răspunsuri consecutive
             Debug.Log($"Răspuns greșit! Resetez contorul de răspunsuri consecutive de la {consecutiveCorrectAnswers} la 0");
             consecutiveCorrectAnswers = 0;
+
+            // Afișează mesajul pentru răspuns greșit
+            ShowBonusMessage("-5 monezi");
 
             // Marchează această întrebare ca fiind încercată
             attemptedQuestionIndices.Add(currentQuestionId);
@@ -341,6 +362,106 @@ public class QuizManager : MonoBehaviour
 
         // Reset the flag after a short delay
         Invoke("ResetProcessingFlag", 0.5f);
+    }
+
+    void ShowBonusMessage(string message, Color? textColor = null)
+    {
+        if (bonusText != null)
+        {
+            bonusText.text = message;
+
+            // Setează culoarea în funcție de mesaj
+            if (textColor.HasValue)
+            {
+                bonusText.color = textColor.Value;
+            }
+            else
+            {
+                // Culoare automată: verde pentru puncte pozitive, roșu pentru negative
+                bonusText.color = message.Contains("-") ? Color.red : Color.green;
+            }
+
+
+            bonusText.gameObject.SetActive(true);
+
+            Debug.Log($"Afișez bonus message: {message} (culoare: {bonusText.color})");
+
+            // Programează ascunderea automată după timpul setat
+            StartCoroutine(HideBonusAfterDelay());
+        }
+        else
+        {
+            Debug.LogWarning("bonusText nu است setat în Inspector!");
+        }
+    }
+    void ShowLifeBonusMessage(string message, Color? textColor = null)
+    {
+        if (bonusLifeText != null)
+        {
+            bonusLifeText.text = message;
+
+            // Setează culoarea (implicit galben/auriu pentru viață)
+            bonusLifeText.color = textColor ?? Color.yellow;
+
+            bonusLifeText.gameObject.SetActive(true);
+
+            Debug.Log($"Afișez life bonus message: {message} (culoare: {bonusLifeText.color})");
+
+            // Programează ascunderea automată după timpul setat
+            StartCoroutine(HideLifeBonusAfterDelay());
+        }
+        else
+        {
+            Debug.LogWarning("bonusLifeText nu este setat în Inspector!");
+        }
+    }
+
+    // Coroutine pentru ascunderea automată a bonusului
+    IEnumerator HideBonusAfterDelay()
+    {
+        yield return new WaitForSeconds(bonusDisplayTime);
+        HideBonusMessage();
+    }
+    IEnumerator HideLifeBonusAfterDelay()
+    {
+        yield return new WaitForSeconds(bonusDisplayTime);
+        HideLifeBonusMessage();
+    }
+
+    // Ascunde mesajul de bonus
+    void HideBonusMessage()
+    {
+        if (bonusText != null)
+        {
+            bonusText.gameObject.SetActive(false);
+        }
+
+    }
+    void HideLifeBonusMessage()
+    {
+        if (bonusLifeText != null)
+        {
+            bonusLifeText.gameObject.SetActive(false);
+        }
+    }
+    IEnumerator ProceedToNextQuestionAfterBonus()
+    {
+        // Așteaptă timpul setat pentru afișarea bonusului
+        yield return new WaitForSeconds(bonusDisplayTime);
+
+        // Ascunde mesajul de bonus
+        HideBonusMessage();
+
+        // Treci la următoarea întrebare
+        if (questions.Count > 0 && questionCounter > 0)
+        {
+            DisplayNextQuestion();
+        }
+        else if (questionCounter == 0)
+        {
+            Debug.Log("Ultima întrebare a fost răspunsă corect! Afișez butonul Continue.");
+            ShowContinueButton();
+        }
     }
 
     private void ResetProcessingFlag()
