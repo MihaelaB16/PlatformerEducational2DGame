@@ -34,9 +34,14 @@ public class QuizManager : MonoBehaviour
     private HashSet<int> attemptedQuestionIndices = new HashSet<int>();
     private int currentQuestionId = 0;
 
+    // Noi variabile pentru sistemul de bonusuri consecutive
+    private int consecutiveCorrectAnswers = 0;
+    private int[] bonusPoints = { 5, 10, 15, 20, 30, 50 }; // Punctele pentru fiecare răspuns consecutiv
+
     void Start()
     {
         questionCounter = 6; // Resetăm contorul când începe quiz-ul
+        consecutiveCorrectAnswers = 0;
         LoadQuestionsFromJSON();
         ShuffleQuestions();
         DisplayNextQuestion();
@@ -199,6 +204,32 @@ public class QuizManager : MonoBehaviour
 
         if (index == currentQuestion.correctAnswer)
         {
+            // Incrementează contorul de răspunsuri consecutive corecte
+            consecutiveCorrectAnswers++;
+
+            // Calculează punctele bonus în funcție de numărul de răspunsuri consecutive
+            int bonusToAdd = 0;
+            if (consecutiveCorrectAnswers <= bonusPoints.Length)
+            {
+                bonusToAdd = bonusPoints[consecutiveCorrectAnswers - 1];
+            }
+            else
+            {
+                // După 6 răspunsuri consecutive, continuă cu 50 de puncte
+                bonusToAdd = 50;
+            }
+
+            Debug.Log($"Răspuns corect #{consecutiveCorrectAnswers}! Bonus: {bonusToAdd} puncte");
+
+            // Verifică dacă este al 6-lea răspuns consecutiv (sau multiplu de 6)
+            bool shouldAddLife = (consecutiveCorrectAnswers % 6 == 0);
+
+            if (shouldAddLife)
+            {
+                Debug.Log("🎉 6 răspunsuri consecutive corecte! Primești o viață bonus!");
+                GameManager.instance.AddLife(1);
+            }
+
             rightAnswer++;
             Debug.Log($"Răspuns corect! rightAnswer: {rightAnswer}, wrongAnswer: {wrongAnswer}");
 
@@ -229,7 +260,9 @@ public class QuizManager : MonoBehaviour
                 }
             }
 
-            GameManager.instance.AddScore(5);
+            // Adaugă punctele bonus
+            GameManager.instance.AddScore(bonusToAdd);
+
             if (collectCoinsButton != null)
             {
                 collectCoinsButton.CheckScore();
@@ -243,12 +276,16 @@ public class QuizManager : MonoBehaviour
             }
             else if (questionCounter == 0)
             {
-                Debug.Log(" Ultima întrebare a fost răspunsă corect! Afișez butonul Continue.");
+                Debug.Log("Ultima întrebare a fost răspunsă corect! Afișez butonul Continue.");
                 Invoke("ShowContinueButton", 0.5f);
             }
         }
         else
         {
+            // RĂSPUNS GREȘIT - Resetează contorul de răspunsuri consecutive
+            Debug.Log($"Răspuns greșit! Resetez contorul de răspunsuri consecutive de la {consecutiveCorrectAnswers} la 0");
+            consecutiveCorrectAnswers = 0;
+
             // Marchează această întrebare ca fiind încercată
             attemptedQuestionIndices.Add(currentQuestionId);
 
