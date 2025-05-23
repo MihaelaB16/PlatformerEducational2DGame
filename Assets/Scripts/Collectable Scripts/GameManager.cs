@@ -46,7 +46,19 @@ public class GameManager : MonoBehaviour
         //lifeText.text = "x" + lifeCount;
         sessionStartTime = Time.time;
     }
+    void Update()
+    {
+        currentSessionTime = Time.time - sessionStartTime;
 
+        // You can uncomment this if you want to continuously display the current session time
+        Debug.Log("Current session time: " + currentSessionTime.ToString("F2") + " seconds");
+        if (isTrackingTime)
+        {
+            float currentTime = Time.time - gamePlayTimeStart + totalGamePlayTime;
+            // Uncomment to display current time in console
+            Debug.Log($"Current gameplay time: {currentTime.ToString("F2")} seconds");
+        }
+    }
     public void AddScore(int amount)
     {
         Debug.Log("🔄 AddScore() apelată! Modific scorul cu: " + amount);
@@ -74,26 +86,25 @@ public class GameManager : MonoBehaviour
         {
             PlayerDamage.instance.SetLives(PlayerDamage.instance.GetLives() + amount);
 
+            // IMPORTANT: Sincronizează lifeCount cu viețile reale
+            lifeCount = PlayerDamage.instance.GetLives();
+
             // Actualizează și textul din QuizCanvas dacă există
             if (quizLifeText != null)
             {
-                quizLifeText.text = "x" + PlayerDamage.instance.GetLives();
+                quizLifeText.text = "x" + lifeCount;
             }
         }
     }
-    void Update()
+    public void SyncLifeCount()
     {
-        currentSessionTime = Time.time - sessionStartTime;
-
-        // You can uncomment this if you want to continuously display the current session time
-         Debug.Log("Current session time: " + currentSessionTime.ToString("F2") + " seconds");
-        if (isTrackingTime)
+        if (PlayerDamage.instance != null)
         {
-            float currentTime = Time.time - gamePlayTimeStart + totalGamePlayTime;
-            // Uncomment to display current time in console
-             Debug.Log($"Current gameplay time: {currentTime.ToString("F2")} seconds");
+            lifeCount = PlayerDamage.instance.GetLives();
+            Debug.Log($"Viețile sincronizate: {lifeCount}");
         }
     }
+    
     public void DisplayAllTimes()
     {
         UserManager.instance.DisplayTimeInConsole();
@@ -203,6 +214,8 @@ public class GameManager : MonoBehaviour
     }
     public void RefreshUIReferences()
     {
+
+        SyncLifeCount();
         // Actualizează referințele pentru HUD principal
         coinTextScore = GameObject.Find("CoinsText")?.GetComponent<Text>();
         if (coinTextScore != null)
