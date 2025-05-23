@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class Checkpoint : MonoBehaviour
 {
     public GameObject quizCanvas; // Referință către UI-ul quizului
+    public GameObject inputQuizCanvas;
     public GameObject[] questionButtons; // Array cu toate butoanele întrebărilor
     public GameObject imageQuestion;
     public GameObject btnBack;
@@ -16,12 +17,7 @@ public class Checkpoint : MonoBehaviour
 
 
 
-    public void OnBackButtonPressed()
-    {
-        Debug.Log("🔄 Dezactivez ColiderLeftCheckpoint și închid quiz-ul!");
-        coliderLeftCheckpoint.SetActive(false); // Dezactivează coliderul stânga
-        quizCanvas.SetActive(false); // Închide quiz-ul
-    }
+    
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -39,7 +35,21 @@ public class Checkpoint : MonoBehaviour
 
         coliderLeftCheckpoint.SetActive(true);
         coliderRightCheckpoint.SetActive(true);
+        inputQuizCanvas.SetActive(true);
+    }
+    public void OnContinueInputButtonPressed()
+    {
+        Debug.Log("🔄 Button_ContinueInput apăsat! Trec la quiz...");
 
+        // Ascunde canvas-ul cu instrucțiunile
+        inputQuizCanvas.SetActive(false);
+
+        // Continuă cu logica existentă
+        StartCoroutine(ShowQuizAfterInput());
+    }
+    IEnumerator ShowQuizAfterInput()
+    {
+        // Afișează quiz-ul principal
         quizCanvas.SetActive(true);
         yield return null; // Așteaptă un frame pentru ca UI-ul să se inițializeze
 
@@ -48,6 +58,7 @@ public class Checkpoint : MonoBehaviour
             GameManager.instance.RefreshUIReferences();
         }
 
+        // Logica existentă pentru verificarea scorului
         if (GameManager.instance.scoreCount <= 0)
         {
             Debug.Log("⚠️ Scor zero/negativ detectat! Afișez doar butonul Back.");
@@ -58,12 +69,13 @@ public class Checkpoint : MonoBehaviour
                 button.SetActive(false);
             }
 
-            // Găsește și activează doar butonul Back
+            // Activează butonul Back
             if (btnBack != null)
             {
                 btnBack.SetActive(true);
             }
-            // Opțional: Fă vizibil un mesaj explicativ pentru jucător
+
+            // Mesaj pentru monede insuficiente
             if (noCoinsMessage != null)
             {
                 noCoinsMessage.SetActive(true);
@@ -72,8 +84,8 @@ public class Checkpoint : MonoBehaviour
             {
                 imageQuestion.SetActive(false);
             }
-            if(btnContinue != null)
-{
+            if (btnContinue != null)
+            {
                 btnContinue.SetActive(false);
             }
         }
@@ -89,13 +101,17 @@ public class Checkpoint : MonoBehaviour
                 button.SetActive(true);
             }
 
-            
             if (noCoinsMessage != null)
             {
                 noCoinsMessage.SetActive(false);
             }
-
         }
+    }
+    public void OnBackButtonPressed()
+    {
+        Debug.Log("🔄 Dezactivez ColiderLeftCheckpoint și închid quiz-ul!");
+        coliderLeftCheckpoint.SetActive(false); // Dezactivează coliderul stânga
+        quizCanvas.SetActive(false); // Închide quiz-ul
     }
 
 }
