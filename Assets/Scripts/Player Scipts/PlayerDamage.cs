@@ -85,38 +85,21 @@ public class PlayerDamage : MonoBehaviour
         // Mutăm personajul la ultimul steag sau la poziția inițială
         transform.position = (FlagController.lastFlagPosition != Vector3.zero) ? FlagController.lastFlagPosition : initialPosition;
 
-        // Restaurăm fundalul curent sau setăm fundalul inițial
-        GameObject background = GameObject.Find("Background");
-        GameObject background2 = GameObject.Find("Background2");
-
-        if (FlagController.currentBackground != null)
+        // Folosește BackgroundManager pentru a seta fundalul corect
+        BackgroundManager backgroundManager = FindObjectOfType<BackgroundManager>();
+        if (backgroundManager != null)
         {
-            Debug.Log("Restaurăm fundalul curent: " + FlagController.currentBackground.name);
-
-            if (FlagController.currentBackground == background)
-            {
-                background.SetActive(true);
-                background2.SetActive(false);
-            }
-            else if (FlagController.currentBackground == background2)
-            {
-                background2.SetActive(true);
-                background.SetActive(false);
-            }
+            backgroundManager.RefreshBackground();
+            Debug.Log("PlayerDamage: BackgroundManager refreshed background");
         }
         else
         {
-            // Setăm fundalul inițial dacă currentBackground nu este setat
-            if (background != null)
-            {
-                background.SetActive(true);
-                background2.SetActive(false);
-                FlagController.currentBackground = background; // Setăm currentBackground la fundalul inițial
-                Debug.Log("Restaurăm fundalul inițial: " + background.name);
-            }
+            Debug.LogWarning("PlayerDamage: BackgroundManager not found!");
         }
+
         UpdateLifeUI();
     }
+
 
     IEnumerator RestartGame()
     {

@@ -18,11 +18,15 @@ public class PlayerMovement : MonoBehaviour
 
     private float jumpPower = 12f;
 
+    private BackgroundManager backgroundManager;
+
     void Awake()  //prima apelata dupa run, apoi e start
     {
-
         myBody = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+
+        // Găsește BackgroundManager
+        backgroundManager = FindObjectOfType<BackgroundManager>();
     }
     // Start is called before the first frame update
     private void Start()
@@ -62,7 +66,22 @@ public class PlayerMovement : MonoBehaviour
         {
             playerDamage.SetLives(progress.Lives);
         }
+
+        // FIX: Setează fundalul corect bazat pe poziția X a jucătorului
+        if (backgroundManager != null)
+        {
+            Invoke("RefreshBackground", 0.3f);
+        }
     }
+
+    private void RefreshBackground()
+    {
+        if (backgroundManager != null)
+        {
+            backgroundManager.RefreshBackground();
+        }
+    }
+
 
 
     // Update is called once per frame
@@ -90,7 +109,7 @@ public class PlayerMovement : MonoBehaviour
     {
         float h = Input.GetAxisRaw("Horizontal");
 
-        if(h > 0)
+        if (h > 0)
         {
             myBody.velocity = new Vector2(speed, myBody.velocity.y);
             ChangeDirection(1); //merge la dreapta
@@ -106,7 +125,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         anim.SetInteger("Speed", Mathf.Abs((int)myBody.velocity.x));
-        
+
     }
 
     void ChangeDirection(int direction)
@@ -126,9 +145,9 @@ public class PlayerMovement : MonoBehaviour
     }
     void OnTriggerEnter2D(Collider2D target)
     {
-       // if (target.tag == "Ground")
+        // if (target.tag == "Ground")
         //{
-         //   print("Collision with tag");
+        //   print("Collision with tag");
         //}
     }
 
@@ -136,9 +155,9 @@ public class PlayerMovement : MonoBehaviour
     {
         isGrounded = Physics2D.Raycast(groundCheckPosition.position, Vector2.down, 0.1f, groundLayer);
 
-        if(isGrounded)
+        if (isGrounded)
         {
-            if(jumped)
+            if (jumped)
             {
                 jumped = false;
                 anim.SetBool("Jump", false);
@@ -150,7 +169,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isGrounded)
         {
-            if(Input.GetKey(KeyCode.Space))
+            if (Input.GetKey(KeyCode.Space))
             {
                 jumped = true;
                 myBody.velocity = new Vector2(myBody.velocity.x, jumpPower);
@@ -162,14 +181,3 @@ public class PlayerMovement : MonoBehaviour
 
 
 } //class
-
-
-
-
-
-
-
-
-
-
-
