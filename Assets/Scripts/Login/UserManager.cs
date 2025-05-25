@@ -263,13 +263,12 @@ public class UserManager : MonoBehaviour
             users[currentUser].Progress.Scenes[currentScene] = new SceneData();
         }
 
-
         // Get current score from GameManager
         if (GameManager.instance != null)
         {
             int currentCoins = GameManager.instance.scoreCount;
             users[currentUser].Progress.Scenes[currentScene].Coins = currentCoins;
-            UpdateCoins(currentCoins); // Update total coins
+            UpdateCoins(currentCoins);
         }
 
         // Get current lives from PlayerDamage
@@ -281,19 +280,32 @@ public class UserManager : MonoBehaviour
             {
                 int currentLives = playerDamage.GetLives();
                 users[currentUser].Progress.Scenes[currentScene].Lives = currentLives;
-                UpdateLives(currentLives); // Update total lives
+                UpdateLives(currentLives);
             }
         }
+
         // Calculate total time for the current scene
         float totalTimeForCurrentScene = sessionTimesPerScene.ContainsKey(currentScene)
             ? sessionTimesPerScene[currentScene]
             : 0f;
 
-
         // Save the total time in JSON for the current scene
         users[currentUser].Progress.Scenes[currentScene].Time = totalTimeForCurrentScene;
 
-        // Calculate the total time across all scenes
+        // **NOUL COD: Calculează și salvează scorul și stelele pentru scenele de gameplay**
+        if (currentScene == "GamePlay" || currentScene == "GamePlayRomana")
+        {
+            var sceneData = users[currentUser].Progress.Scenes[currentScene];
+            var scoreData = ScoreCalculator.CalculateSceneScore(sceneData);
+
+            // Salvează scorul și stelele în JSON
+            sceneData.FinalScore = scoreData.Score;
+            sceneData.Stars = scoreData.Stars;
+
+            Debug.Log($"Calculated score for {currentScene}: {scoreData.Score:F1} ({scoreData.Stars} stars)");
+        }
+
+        // Calculate totals across all scenes
         int totalCoins = 0;
         int totalLives = 0;
         float totalTimeAcrossScenes = 0f;
@@ -314,8 +326,41 @@ public class UserManager : MonoBehaviour
 
         Debug.Log($"Saved progress data for user '{currentUser}': Total Time for Current Scene={totalTimeForCurrentScene}, Total Time Across Scenes={totalTimeAcrossScenes}");
     }
+    // Metodă nouă pentru a obține datele de scor pentru o scenă
+    public SceneScoreData GetSceneScoreData(string username, string sceneName)
+    {
+        if (users.ContainsKey(username) &&
+            users[username].Progress.Scenes.ContainsKey(sceneName))
+        {
+            var sceneData = users[username].Progress.Scenes[sceneName];
+            return ScoreCalculator.CalculateSceneScore(sceneData);
+        }
 
+        return new SceneScoreData();
+    }
 
+    // Metodă pentru a forța recalcularea scorurilor pentru toate scenele unui utilizator
+    public void RecalculateAllScores(string username)
+    {
+        if (!users.ContainsKey(username)) return;
+
+        foreach (var kvp in users[username].Progress.Scenes)
+        {
+            string sceneName = kvp.Key;
+            var sceneData = kvp.Value;
+
+            if (sceneName == "GamePlay" || sceneName == "GamePlayRomana")
+            {
+                var scoreData = ScoreCalculator.CalculateSceneScore(sceneData);
+                sceneData.FinalScore = scoreData.Score;
+                sceneData.Stars = scoreData.Stars;
+
+                Debug.Log($"Recalculated {sceneName}: {scoreData.Score:F1} points, {scoreData.Stars} stars");
+            }
+        }
+
+        SaveUsers();
+    }
 
 
     public void SavePlayerPosition()
@@ -593,6 +638,10 @@ public class SceneData
     public float Time;
     public List<string> AnsweredQuestions;
 
+    // Noi câmpuri pentru sistemul de scor
+    public float FinalScore = 0f;  // Scorul calculat (0-100)
+    public int Stars = 1;          // Numărul de stele (1-5)
+
     public LevelStats Level1 = new LevelStats();
     public LevelStats Level2 = new LevelStats();
 
@@ -600,9 +649,11 @@ public class SceneData
     {
         LastFlagPosition = new SerializableVector3(0, 0, 0);
         Coins = 0;
-        Lives = 3; // Număr implicit de vieți
+        Lives = 3;
         Time = 0.0f;
         AnsweredQuestions = new List<string>();
+        FinalScore = 0f;
+        Stars = 1;
     }
 }
 
