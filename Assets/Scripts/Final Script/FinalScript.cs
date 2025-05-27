@@ -19,6 +19,9 @@ public class FinalScript : MonoBehaviour
     [Header("Score Calculator")]
     public ScoreCalculator scoreCalculator; // Referință către ScoreCalculator
 
+    [Header("Details Canvas Manager")]
+    public DetailsCanvasManager detailsCanvasManager; // Referință către DetailsCanvasManager
+
     void Start()
     {
         // Debug pentru a verifica referințele la început
@@ -26,6 +29,7 @@ public class FinalScript : MonoBehaviour
         Debug.Log($"finalScoreText: {(finalScoreText != null ? "✅ SET" : "❌ NULL")}");
         Debug.Log($"starImage: {(starImage != null ? "✅ SET" : "❌ NULL")}");
         Debug.Log($"scoreCalculator: {(scoreCalculator != null ? "✅ SET" : "❌ NULL")}");
+        Debug.Log($"detailsCanvasManager: {(detailsCanvasManager != null ? "✅ SET" : "❌ NULL")}");
 
         if (scoreCalculator != null && scoreCalculator.starSprites != null)
         {
@@ -80,8 +84,8 @@ public class FinalScript : MonoBehaviour
         wrongAnswersText.text = "x" + (sceneData.Level1.wrongAnswer + sceneData.Level2.wrongAnswer);
 
         // **GĂSEȘTE ȘI AFIȘEAZĂ SCORUL FINAL** - Caută în Canvas activ
-        Text finalScoreTextComponent = null;
-        if (quizCanvas != null)
+        Text finalScoreTextComponent = finalScoreText;
+        if (finalScoreTextComponent == null && quizCanvas != null)
         {
             Text[] texts = quizCanvas.GetComponentsInChildren<Text>(true);
             foreach (Text t in texts)
@@ -120,8 +124,8 @@ public class FinalScript : MonoBehaviour
         }
 
         // **GĂSEȘTE ȘI AFIȘEAZĂ STELELE** - Caută în Canvas activ
-        Image starImageComponent = null;
-        if (quizCanvas != null)
+        Image starImageComponent = starImage;
+        if (starImageComponent == null && quizCanvas != null)
         {
             Image[] images = quizCanvas.GetComponentsInChildren<Image>(true);
             starImageComponent = System.Array.Find(images, img =>
@@ -161,6 +165,27 @@ public class FinalScript : MonoBehaviour
         {
             if (starImageComponent == null) Debug.LogError("❌ Could not find any Image component for Stars!");
             if (calculator == null) Debug.LogError("❌ Could not find ScoreCalculator component!");
+        }
+
+        // **ACTUALIZEAZĂ DETAILS CANVAS MANAGER**
+        if (detailsCanvasManager != null)
+        {
+            detailsCanvasManager.RefreshDetails();
+            Debug.Log("✅ Details Canvas Manager refreshed!");
+        }
+        else
+        {
+            // Încearcă să găsească DetailsCanvasManager în scenă
+            DetailsCanvasManager foundManager = FindObjectOfType<DetailsCanvasManager>();
+            if (foundManager != null)
+            {
+                foundManager.RefreshDetails();
+                Debug.Log("✅ Found and refreshed Details Canvas Manager!");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ Details Canvas Manager not found!");
+            }
         }
 
         Debug.Log($"Final Stats for '{username}' in '{currentScene}':");
