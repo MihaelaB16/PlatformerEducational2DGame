@@ -2,57 +2,57 @@
   "items": [
     {
       "question": "Question1",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. (−∞,4]", "b. [4,6)", "c. (6,+∞) ", "d. (4,6]" ],
       "correctAnswer": 0
     },
     {
       "question": "Question1-2",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. 5,(024)", "b. 5,(24)", "c. 5,2(4)", "d. 5,24" ],
       "correctAnswer": 0
     },
     {
       "question": "Question1-3",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. Alin", "b. Ioana", "c. Dana", "d. Vlad" ],
       "correctAnswer": 0
     },
     {
       "question": "Question1-4",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. 20 lei", "b. 40 lei", "c. 160 lei", "d. 180 lei" ],
       "correctAnswer": 0
     },
     {
       "question": "Question1-5",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. -9", "b. -6", "c. 0", "d. 1" ],
       "correctAnswer": 0
     },
     {
       "question": "Question1-6",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. 2", "b. 4", "b. 8", "c. 12" ],
       "correctAnswer": 0
     },
     {
       "question": "Question1-7",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. 10", "b. 15", "c. 35", "d. 115" ],
       "correctAnswer": 0
     },
     {
       "question": "Question1-8",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. -3ᴼC", "b. -1ᴼC", "c. 1ᴼC", "d. 3ᴼC" ],
       "correctAnswer": 0
     },
     {
       "question": "Question1-9",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. -1", "b. 4", "c. 2", "d. -4" ],
       "correctAnswer": 0
     },
     {
       "question": "Question1-10",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. Andreea", "b. Iris", "c. Mihai", "d. Radu" ],
       "correctAnswer": 0
     },
     {
       "question": "Question1-11",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a. 40", "b. 10", "c. 5", "d. 1" ],
       "correctAnswer": 0
     }
   ]

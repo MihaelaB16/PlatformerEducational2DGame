@@ -57,7 +57,7 @@ public class ScoreScript : MonoBehaviour
 
         while (timeLeft > 0)
         {
-            coinRespawnTimerText.text = "Timer: " + Mathf.Ceil(timeLeft) + "s";
+            coinRespawnTimerText.text = ": " + Mathf.Ceil(timeLeft) + "s";
             timeLeft -= Time.deltaTime;
             yield return null;
         }

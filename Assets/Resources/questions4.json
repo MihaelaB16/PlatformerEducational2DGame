@@ -2,57 +2,57 @@
   "items": [
     {
       "question": "Question4",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     },
     {
       "question": "Question4-2",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     },
     {
       "question": "Question4-3",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     },
     {
       "question": "Question4-4",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     },
     {
       "question": "Question4-5",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     },
     {
       "question": "Question4-6",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     },
     {
       "question": "Question4-7",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     },
     {
       "question": "Question4-8",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     },
     {
       "question": "Question4-9",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     },
     {
       "question": "Question4-10",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     },
     {
       "question": "Question4-11",
-      "answers": [ "10", "15", "35", "115" ],
+      "answers": [ "a", "b", "c", "d" ],
       "correctAnswer": 0
     }
   ]

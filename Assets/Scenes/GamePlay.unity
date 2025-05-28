@@ -2676,7 +2676,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -1326, y: -112.28}
+  m_AnchoredPosition: {x: -1346, y: -112.28}
   m_SizeDelta: {x: 143.62, y: 57.59}
   m_Pivot: {x: 0.49999997, y: 0.5}
 --- !u!114 &87713872
@@ -2701,7 +2701,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 30
+    m_FontSize: 40
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -26188,21 +26188,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fireBullet: {fileID: 1781383106464633158, guid: 0cd77b6a3bad84d4a8420a75957a01b8, type: 3}
---- !u!114 &839639480
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 839639466}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 144b2407548aefc4c96c056ae6670c81, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  coinRespawnTimerText: {fileID: 87713872}
-  coinRespawnTime: 30
-  coinRespawnSound: {fileID: 8300000, guid: bed3d4fda30b3ab43b359cd1aebf1e01, type: 3}
 --- !u!82 &839639481
 AudioSource:
   m_ObjectHideFlags: 0
@@ -26313,6 +26298,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lives: 3
   sceneName: GamePlay
+--- !u!114 &839639483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 839639466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 144b2407548aefc4c96c056ae6670c81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  coinRespawnTimerText: {fileID: 87713872}
+  coinRespawnTime: 30
+  coinRespawnSound: {fileID: 8300000, guid: bed3d4fda30b3ab43b359cd1aebf1e01, type: 3}
 --- !u!1 &841269536
 GameObject:
   m_ObjectHideFlags: 0
@@ -33505,8 +33505,8 @@ Transform:
   m_GameObject: {fileID: 1084761662}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.0112, y: -0.2186, z: 10}
-  m_LocalScale: {x: 1.8363763, y: 1.8474804, z: 1}
+  m_LocalPosition: {x: -0.0686, y: -0.2299, z: 10}
+  m_LocalScale: {x: 0.9409829, y: 0.9331626, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 519420032}
@@ -33552,12 +33552,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 95e27702b394f354eadbb1a875aa2e39, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4121144a648d0534aaeecd1c2e7562f8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 32, y: 18.75}
+  m_Size: {x: 20.48, y: 12}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -65631,10 +65631,10 @@ PrefabInstance:
       addedObject: {fileID: 839639473}
     - targetCorrespondingSourceObject: {fileID: 2013244290880560223, guid: 1c159a462b80777468c68f7e054b303e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 839639480}
+      addedObject: {fileID: 839639482}
     - targetCorrespondingSourceObject: {fileID: 2013244290880560223, guid: 1c159a462b80777468c68f7e054b303e, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 839639482}
+      addedObject: {fileID: 839639483}
   m_SourcePrefab: {fileID: 100100000, guid: 1c159a462b80777468c68f7e054b303e, type: 3}
 --- !u!1001 &5318863324589033751
 PrefabInstance:
