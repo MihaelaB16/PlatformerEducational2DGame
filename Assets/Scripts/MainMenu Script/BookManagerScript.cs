@@ -6,36 +6,33 @@ using UnityEngine.UI;
 public class BookManagerScript : MonoBehaviour
 {
     [Header("Book Buttons")]
-    public Button bookButton; // BookButtonMate sau BookButtonRomana
+    public Button bookButton;
 
     [Header("Canvas")]
-    public GameObject bookCanvas; // CanvasNoteMate sau CanvasNoteRomana
+    public GameObject bookCanvas;
 
     [Header("Page Images")]
-    public Image pageDisplayImage; // Imaginea care se va schimba
-    public Sprite page1Image; // Prima imagine
-    public Sprite page2Image; // A doua imagine  
-    public Sprite page3Image; // A treia imagine
+    public Image pageDisplayImage;
+    public Sprite page1Image;
+    public Sprite page2Image;
+    public Sprite page3Image;
 
     [Header("Navigation Buttons")]
-    public Button nextPageButton; // NextPageButton
-    public Button backPageButton; // BackPageButton
+    public Button nextPageButton;
+    public Button backPageButton;
 
     [Header("Close Button")]
-    public Button closeButton; // Buton pentru închiderea canvas-ului (op?ional)
+    public Button closeButton;
 
-    // Variabil? pentru pagina curent?
     private int currentPage = 1;
 
     void Start()
     {
-        // Configureaz? butonul principal pentru deschiderea c?r?ii
         if (bookButton != null)
         {
             bookButton.onClick.AddListener(OpenBook);
         }
 
-        // Configureaz? butoanele de navigare
         if (nextPageButton != null)
         {
             nextPageButton.onClick.AddListener(NextPage);
@@ -46,13 +43,11 @@ public class BookManagerScript : MonoBehaviour
             backPageButton.onClick.AddListener(BackPage);
         }
 
-        // Configureaz? butonul de închidere (dac? exist?)
         if (closeButton != null)
         {
             closeButton.onClick.AddListener(CloseBook);
         }
 
-        // Asigur?-te c? canvas-ul este dezactivat la început
         if (bookCanvas != null)
         {
             bookCanvas.SetActive(false);
@@ -64,9 +59,8 @@ public class BookManagerScript : MonoBehaviour
         if (bookCanvas != null)
         {
             bookCanvas.SetActive(true);
-            currentPage = 1; // Reseteaz? la prima pagin?
+            currentPage = 1;
             UpdatePage();
-            Debug.Log("Cartea a fost deschis?!");
         }
     }
 
@@ -75,33 +69,30 @@ public class BookManagerScript : MonoBehaviour
         if (bookCanvas != null)
         {
             bookCanvas.SetActive(false);
-            Debug.Log("Cartea a fost închis?!");
         }
     }
 
     public void NextPage()
     {
-        if (currentPage < 3) // Nu poate trece de pagina 3
+        if (currentPage < 3)
         {
             currentPage++;
             UpdatePage();
-            Debug.Log($"Navigat la pagina {currentPage}");
         }
     }
 
     public void BackPage()
     {
-        if (currentPage > 1) // Nu poate merge sub pagina 1
+        if (currentPage > 1)
         {
             currentPage--;
             UpdatePage();
-            Debug.Log($"Navigat înapoi la pagina {currentPage}");
         }
     }
 
+    // Actualizeaza imaginea si butoanele pe baza paginii curente
     private void UpdatePage()
     {
-        // Actualizeaz? imaginea în func?ie de pagina curent?
         if (pageDisplayImage != null)
         {
             switch (currentPage)
@@ -118,35 +109,29 @@ public class BookManagerScript : MonoBehaviour
             }
         }
 
-        // Actualizeaz? starea butoanelor de navigare
         UpdateNavigationButtons();
     }
 
+    // Controleaza vizibilitatea butoanelor de navigare
     private void UpdateNavigationButtons()
     {
         if (currentPage == 1)
         {
-            // Pagina 1: doar NextPageButton activ
             if (nextPageButton != null) nextPageButton.gameObject.SetActive(true);
             if (backPageButton != null) backPageButton.gameObject.SetActive(false);
         }
         else if (currentPage == 2)
         {
-            // Pagina 2: ambele butoane active
             if (nextPageButton != null) nextPageButton.gameObject.SetActive(true);
             if (backPageButton != null) backPageButton.gameObject.SetActive(true);
         }
         else if (currentPage == 3)
         {
-            // Pagina 3: doar BackPageButton activ
             if (nextPageButton != null) nextPageButton.gameObject.SetActive(false);
             if (backPageButton != null) backPageButton.gameObject.SetActive(true);
         }
-
-        Debug.Log($"Pagina curent?: {currentPage} - NextButton: {(nextPageButton != null ? nextPageButton.gameObject.activeSelf : false)}, BackButton: {(backPageButton != null ? backPageButton.gameObject.activeSelf : false)}");
     }
 
-    // Metod? public? pentru a seta pagina direct (util? pentru debugging)
     public void SetPage(int pageNumber)
     {
         if (pageNumber >= 1 && pageNumber <= 3)
@@ -156,7 +141,6 @@ public class BookManagerScript : MonoBehaviour
         }
     }
 
-    // Metod? public? pentru a ob?ine pagina curent?
     public int GetCurrentPage()
     {
         return currentPage;

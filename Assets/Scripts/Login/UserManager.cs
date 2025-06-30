@@ -4,6 +4,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
 
+// Manager principal pentru gestionarea utilizatorilor si progresului lor
 public class UserManager : MonoBehaviour
 {
     public static UserManager instance;
@@ -13,24 +14,24 @@ public class UserManager : MonoBehaviour
     private string currentSceneName;
     private Dictionary<string, float> sessionTimesPerScene = new Dictionary<string, float>();
 
-
+    // Initializare singleton si incarcarea utilizatorilor
     private void Awake()
     {
         if (instance == null)
         {
-            instance = this; // Assign the current instance
-            DontDestroyOnLoad(gameObject); // Optional: Keep this instance across scenes
+            instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            Destroy(gameObject); // Destroy duplicate instances
+            Destroy(gameObject);
         }
 
         userFilePath = Path.Combine(Application.persistentDataPath, "users.json");
         LoadUsers();
     }
 
-
+    // Urmarire timpul petrecut in fiecare scena
     void Update()
     {
         string sceneName = SceneManager.GetActiveScene().name;
@@ -38,7 +39,7 @@ public class UserManager : MonoBehaviour
 
         if (sceneName == "MainMenu")
         {
-            return; // Nu urmări timpul pentru MainMenu
+            return;
         }
 
         if (!sessionTimesPerScene.ContainsKey(sceneName))
@@ -47,7 +48,7 @@ public class UserManager : MonoBehaviour
         sessionTimesPerScene[sceneName] += Time.deltaTime;
     }
 
-
+    // Incarca utilizatorii din fisierul JSON
     void LoadUsers()
     {
         if (File.Exists(userFilePath))
@@ -59,7 +60,7 @@ public class UserManager : MonoBehaviour
                 users = new Dictionary<string, UserData>();
             }
 
-            // Inițializează structura JSON dacă lipsește
+            // Initializeaza structura de scene daca lipseste
             foreach (var user in users.Values)
             {
                 if (user.Progress.Scenes == null)
@@ -73,17 +74,19 @@ public class UserManager : MonoBehaviour
             users = new Dictionary<string, UserData>();
         }
     }
+
+    // Salveaza utilizatorii in fisierul JSON
     void SaveUsers()
     {
         string json = JsonConvert.SerializeObject(users, Formatting.Indented);
         File.WriteAllText(userFilePath, json);
     }
 
+    // Initializeaza jocul cu progresul utilizatorului
     public void InitializeGameWithUserProgress(string username)
     {
         if (!users.ContainsKey(username))
         {
-            Debug.LogWarning($"User '{username}' not found. Cannot initialize game state.");
             return;
         }
 
@@ -94,18 +97,16 @@ public class UserManager : MonoBehaviour
         if (users[username].Progress.Scenes.ContainsKey(currentScene))
             previousTime = users[username].Progress.Scenes[currentScene].Time;
 
-        sessionTimesPerScene[currentScene] = 0f; // Start fresh for this session
-
+        sessionTimesPerScene[currentScene] = 0f;
 
         if (!users[username].Progress.Scenes.ContainsKey(currentScene))
         {
-            Debug.LogWarning($"No progress found for user '{username}' in scene '{currentScene}'.");
             return;
         }
 
         SceneData sceneData = users[username].Progress.Scenes[currentScene];
 
-        // Set the coins in GameManager
+        // Seteaza monedele in GameManager
         if (GameManager.instance != null)
         {
             GameManager.instance.scoreCount = sceneData.Coins;
@@ -117,24 +118,24 @@ public class UserManager : MonoBehaviour
             GameManager.instance.ResetGameplayTime();
         }
 
+        // Seteaza vietile jucatorului
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
             PlayerDamage playerDamage = player.GetComponent<PlayerDamage>();
             if (playerDamage != null)
             {
-                playerDamage.SetLives(sceneData.Lives); // ✅ adaugă această linie
+                playerDamage.SetLives(sceneData.Lives);
             }
         }
-
     }
 
-
+    // Inregistreaza un utilizator nou
     public bool RegisterUser(string username, string password)
     {
         if (users.ContainsKey(username))
         {
-            return false; // User already exists
+            return false; // Utilizatorul deja exista
         }
 
         UserData newUser = new UserData
@@ -144,7 +145,7 @@ public class UserManager : MonoBehaviour
             Progress = new UserProgress()
         };
 
-        // Inițializează pozițiile și progresul pentru ambele scene
+        // Initializeaza pozitiile pentru ambele scene
         newUser.Progress.Scenes["GamePlay"] = new SceneData
         {
             LastFlagPosition = new SerializableVector3(-10.0f, -3.0f, 0.0f)
@@ -160,14 +161,14 @@ public class UserManager : MonoBehaviour
         return true;
     }
 
-
+    // Logare utilizator cu verificarea credentialelor
     public bool LoginUser(string username, string password, out UserProgress progress)
     {
         if (users.ContainsKey(username) && users[username].Password == password)
         {
             progress = users[username].Progress;
 
-            // Inițializăm proprietățile dacă sunt null
+            // Initializeaza lista de intrebari daca nu exista
             if (progress.AnsweredQuestions == null)
             {
                 progress.AnsweredQuestions = new List<string>();
@@ -180,6 +181,7 @@ public class UserManager : MonoBehaviour
         return false;
     }
 
+    // Salveaza progresul utilizatorului
     public void SaveProgress(string username, UserProgress progress)
     {
         if (users.ContainsKey(username))
@@ -189,10 +191,10 @@ public class UserManager : MonoBehaviour
         }
     }
 
+    // Salveaza pozitia jucatorului pentru o anumita scena
     public void SavePlayerPosition(string username, string sceneName, Vector3 position)
     {
-        Debug.Log($"Saving position for user '{username}' in scene '{sceneName}': {position}");
-        UserManager.instance.DisplayTimeInConsole();
+        DisplayTimeInConsole();
         if (users.ContainsKey(username))
         {
             if (users[username].Progress.Scenes == null)
@@ -208,23 +210,18 @@ public class UserManager : MonoBehaviour
             users[username].Progress.Scenes[sceneName].LastFlagPosition = new SerializableVector3(position);
             SaveUsers();
         }
-        else
-        {
-            Debug.LogWarning($"User '{username}' not found in the dictionary.");
-        }
     }
 
+    // Incarca pozitia salvata a jucatorului pentru o scena
     public Vector3 LoadPlayerPosition(string username, string sceneName)
     {
         if (string.IsNullOrEmpty(username))
         {
-            Debug.LogError("Username is null or empty. Cannot load player position.");
             return Vector3.zero;
         }
 
         if (string.IsNullOrEmpty(sceneName))
         {
-            Debug.LogError("Scene name is null or empty. Cannot load player position.");
             return Vector3.zero;
         }
 
@@ -232,15 +229,13 @@ public class UserManager : MonoBehaviour
             users[username].Progress.Scenes != null &&
             users[username].Progress.Scenes.ContainsKey(sceneName))
         {
-            Debug.Log($"Loaded position for user '{username}' in scene '{sceneName}': {users[username].Progress.Scenes[sceneName].LastFlagPosition}");
             return users[username].Progress.Scenes[sceneName].LastFlagPosition.ToVector3();
         }
 
-        Debug.LogWarning($"No saved position found for user '{username}' in scene '{sceneName}'. Returning default position.");
         return Vector3.zero;
     }
 
-
+    // Salveaza progresul la inchiderea aplicatiei
     private void OnApplicationQuit()
     {
         SavePlayerPosition();
@@ -253,20 +248,19 @@ public class UserManager : MonoBehaviour
         SaveProgressData();
     }
 
+    // Salveaza toate datele de progres pentru utilizatorul curent
     public void SaveProgressData()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
         {
-            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
             return;
         }
 
         string currentScene = SceneManager.GetActiveScene().name;
         if (currentScene == "MainMenu")
         {
-            Debug.Log("MainMenu scene - skipping save");
-            return;
+            return; // Nu salveaza progres pentru meniu
         }
 
         if (!users[currentUser].Progress.Scenes.ContainsKey(currentScene))
@@ -274,7 +268,7 @@ public class UserManager : MonoBehaviour
             users[currentUser].Progress.Scenes[currentScene] = new SceneData();
         }
 
-        // Get current score from GameManager
+        // Actualizeaza monedele din GameManager
         if (GameManager.instance != null)
         {
             int currentCoins = GameManager.instance.scoreCount;
@@ -282,7 +276,7 @@ public class UserManager : MonoBehaviour
             UpdateCoins(currentCoins);
         }
 
-        // Get current lives from PlayerDamage
+        // Actualizeaza vietile din PlayerDamage
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
@@ -295,28 +289,24 @@ public class UserManager : MonoBehaviour
             }
         }
 
-        // Calculate total time for the current scene
+        // Calculeaza timpul total pentru scena curenta
         float totalTimeForCurrentScene = sessionTimesPerScene.ContainsKey(currentScene)
             ? sessionTimesPerScene[currentScene]
             : 0f;
 
-        // Save the total time in JSON for the current scene
         users[currentUser].Progress.Scenes[currentScene].Time = totalTimeForCurrentScene;
 
-        // **NOUL COD: Calculează și salvează scorul și stelele pentru scenele de gameplay**
+        // Calculeaza si salveaza scorul si stelele pentru scenele de gameplay
         if (currentScene == "GamePlay" || currentScene == "GamePlayRomana")
         {
             var sceneData = users[currentUser].Progress.Scenes[currentScene];
             var scoreData = ScoreCalculator.CalculateSceneScore(sceneData);
 
-            // Salvează scorul și stelele în JSON
             sceneData.FinalScore = scoreData.Score;
             sceneData.Stars = scoreData.Stars;
-
-            Debug.Log($"Calculated score for {currentScene}: {scoreData.Score:F1} ({scoreData.Stars} stars)");
         }
 
-        // Calculate totals across all scenes
+        // Calculeaza totalurile pentru toate scenele
         int totalCoins = 0;
         int totalLives = 0;
         float totalTimeAcrossScenes = 0f;
@@ -327,17 +317,14 @@ public class UserManager : MonoBehaviour
             totalTimeAcrossScenes += scene.Time;
         }
 
-        // Save the totals in the user's overall progress
+        // Actualizeaza progresul global
         users[currentUser].Progress.Coins = totalCoins;
         users[currentUser].Progress.Lives = totalLives;
         users[currentUser].Progress.Time = totalTimeAcrossScenes;
 
-        // Save the updated data
         SaveUsers();
-
-        Debug.Log($"Saved progress data for user '{currentUser}': Total Time for Current Scene={totalTimeForCurrentScene}, Total Time Across Scenes={totalTimeAcrossScenes}");
     }
-    // Metodă nouă pentru a obține datele de scor pentru o scenă
+    // Obtine datele de scor calculate pentru o scena specifica
     public SceneScoreData GetSceneScoreData(string username, string sceneName)
     {
         if (users.ContainsKey(username) &&
@@ -350,7 +337,7 @@ public class UserManager : MonoBehaviour
         return new SceneScoreData();
     }
 
-    // Metodă pentru a forța recalcularea scorurilor pentru toate scenele unui utilizator
+    // Recalculeaza toate scorurile pentru un utilizator
     public void RecalculateAllScores(string username)
     {
         if (!users.ContainsKey(username)) return;
@@ -360,26 +347,24 @@ public class UserManager : MonoBehaviour
             string sceneName = kvp.Key;
             var sceneData = kvp.Value;
 
+            // Recalculeaza doar pentru scenele de gameplay
             if (sceneName == "GamePlay" || sceneName == "GamePlayRomana")
             {
                 var scoreData = ScoreCalculator.CalculateSceneScore(sceneData);
                 sceneData.FinalScore = scoreData.Score;
                 sceneData.Stars = scoreData.Stars;
-
-                Debug.Log($"Recalculated {sceneName}: {scoreData.Score:F1} points, {scoreData.Stars} stars");
             }
         }
 
         SaveUsers();
     }
 
-
+    // Salveaza pozitia curenta a jucatorului din scena activa
     public void SavePlayerPosition()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
         {
-            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
             return;
         }
 
@@ -387,90 +372,77 @@ public class UserManager : MonoBehaviour
 
         if (currentScene == "MainMenu")
         {
-            Debug.Log("MainMenu scene - skipping position save");
-            return;
+            return; // Nu salva pozitie pentru meniu
         }
 
-        // Găsește jucătorul în scenă
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player == null)
         {
-            Debug.LogWarning("Player object not found in the scene. Cannot save position.");
             return;
         }
 
-        // Obține poziția jucătorului
         Vector3 playerPosition = player.transform.position;
 
-        Debug.Log($"Saving position for user '{currentUser}' in scene '{currentScene}': {playerPosition}");
         SavePlayerPosition(currentUser, currentScene, playerPosition);
     }
+
+    // Actualizeaza monedele pentru utilizatorul curent
     public void UpdateCoins(int coins)
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
         {
-            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
             return;
         }
 
         users[currentUser].Progress.Coins = coins;
         SaveUsers();
-        Debug.Log($"Updated coins for user '{currentUser}': {coins}");
     }
 
-    // Update lives for the current user
+    // Actualizeaza vietile pentru utilizatorul curent
     public void UpdateLives(int lives)
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
         {
-            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
             return;
         }
 
         users[currentUser].Progress.Lives = lives;
         SaveUsers();
-        Debug.Log($"Updated lives for user '{currentUser}': {lives}");
     }
 
-    // Update time for the current user
+    // Actualizeaza timpul pentru utilizatorul curent
     public void UpdateTime(float time)
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
         {
-            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
             return;
         }
 
         users[currentUser].Progress.Time = time;
         SaveUsers();
-        Debug.Log($"Updated time for user '{currentUser}': {time}");
     }
 
-
-
-    // Get the current user's progress data
+    // Obtine progresul complet al utilizatorului curent
     public UserProgress GetCurrentUserProgress()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
         {
-            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
             return new UserProgress();
         }
 
         return users[currentUser].Progress;
     }
 
-    // Save all progress data for current user
+    // Salveaza tot progresul pentru utilizatorul curent
     public void SaveAllProgress(int coins, int lives, float time)
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
         {
-            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
             return;
         }
 
@@ -478,28 +450,26 @@ public class UserManager : MonoBehaviour
         users[currentUser].Progress.Lives = lives;
         users[currentUser].Progress.Time = time;
         SaveUsers();
-        Debug.Log($"Saved all progress for user '{currentUser}': Coins={coins}, Lives={lives}, Time={time}");
     }
+
+    // Restaureaza progresul pentru o scena specifica
     public void RestoreProgressForScene(string username, string sceneName)
     {
         if (!users.ContainsKey(username))
         {
-            Debug.LogWarning($"User '{username}' not found.");
             return;
         }
 
-        // Verifică explicit pentru GamePlay și GamePlayRomana
         if (sceneName == "GamePlay" || sceneName == "GamePlayRomana")
         {
             if (!users[username].Progress.Scenes.ContainsKey(sceneName))
             {
-                Debug.LogWarning($"No progress found for user '{username}' in scene '{sceneName}'.");
                 return;
             }
 
             SceneData sceneData = users[username].Progress.Scenes[sceneName];
 
-            // Restore coins
+            // Restaureaza monedele in GameManager
             if (GameManager.instance != null)
             {
                 GameManager.instance.scoreCount = sceneData.Coins;
@@ -507,64 +477,48 @@ public class UserManager : MonoBehaviour
                     GameManager.instance.coinTextScore.text = "x" + sceneData.Coins;
             }
 
-            // Restore lives and position
+            // Restaureaza vietile si pozitia jucatorului
             GameObject player = GameObject.FindGameObjectWithTag("Player");
             if (player != null)
             {
                 PlayerDamage playerDamage = player.GetComponent<PlayerDamage>();
                 if (playerDamage != null)
                 {
-                    playerDamage.SetLives(sceneData.Lives); // <-- AICI setezi viețile corect!
+                    playerDamage.SetLives(sceneData.Lives);
                 }
                 player.transform.position = sceneData.LastFlagPosition.ToVector3();
             }
-            else
-            {
-                Debug.LogWarning("Player object not found in the scene.");
-            }
-        }
-        else
-        {
-            Debug.LogWarning($"Scene '{sceneName}' is not handled for progress restoration.");
         }
     }
 
-
-    // Add this method to UserManager.cs
+    // Metoda pentru afisarea timpului in consola (pentru debugging)
     public void DisplayTimeInConsole()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
         {
-            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
             return;
         }
 
         float savedTime = users[currentUser].Progress.Time;
-
-        Debug.Log($"==============================================");
-        Debug.Log($"Current user: {currentUser}");
-        Debug.Log($"Total elapsed time: {savedTime.ToString("F2")} seconds");
-        Debug.Log($"That's approximately {(savedTime / 60).ToString("F2")} minutes");
-        Debug.Log($"==============================================");
     }
+
+    // Salveaza timpul de joc curent
     public void SaveCurrentGameplayTime(float gameplayTime)
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (string.IsNullOrEmpty(currentUser) || !users.ContainsKey(currentUser))
         {
-            Debug.LogWarning("No valid logged-in user found or user does not exist in the dictionary.");
             return;
         }
 
-        // Store the gameplayTime directly (don't add to previous time)
         users[currentUser].Progress.Time = gameplayTime;
         SaveUsers();
-        Debug.Log($"Updated gameplay time for user '{currentUser}': {gameplayTime.ToString("F2")} seconds");
     }
+
+    // Delogarea utilizatorului si resetarea progresului
     public void LogoutUser()
     {
-        Debug.Log("Logging out the current user and resetting state.");
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
         if (!string.IsNullOrEmpty(currentUser) && users.ContainsKey(currentUser))
         {
@@ -573,8 +527,10 @@ public class UserManager : MonoBehaviour
         }
     }
 
+    // Incarca progresul complet al jucatorului pentru o scena
     public PlayerProgressData LoadPlayerProgress(string username, string sceneName)
     {
+        // Valori implicite
         PlayerProgressData data = new PlayerProgressData
         {
             Position = Vector3.zero,
@@ -596,6 +552,8 @@ public class UserManager : MonoBehaviour
         }
         return data;
     }
+
+    // Reseteaza progresul pentru scena curenta la valorile initiale
     public void ResetProgressForCurrentScene(Vector3 initialPosition, int initialCoins, int initialLives, float initialTime)
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
@@ -614,10 +572,9 @@ public class UserManager : MonoBehaviour
 
         SaveUsers();
     }
-
 }
 
-
+// Datele unui utilizator pentru serializare JSON
 [System.Serializable]
 public class UserData
 {
@@ -626,6 +583,7 @@ public class UserData
     public UserProgress Progress;
 }
 
+// Progresul complet al unui utilizator
 [System.Serializable]
 public class UserProgress
 {
@@ -633,19 +591,20 @@ public class UserProgress
     public int Coins;
     public int Lives;
     public float Time;
-    public int rightAnswer = 0; // sum of all levels
-    public int wrongAnswer = 0;
+    public int rightAnswer = 0; // Total raspunsuri corecte
+    public int wrongAnswer = 0; // Total raspunsuri gresite
     public List<string> AnsweredQuestions;
 
     public UserProgress()
     {
         Coins = 0;
-        Lives = 3; // Număr implicit de vieți
+        Lives = 3; // Numarul implicit de vieti
         Time = 0.0f;
-        AnsweredQuestions = new List<string>(); // Listă goală
+        AnsweredQuestions = new List<string>();
     }
 }
 
+// Datele unei scene specifice
 [System.Serializable]
 public class SceneData
 {
@@ -655,10 +614,11 @@ public class SceneData
     public float Time;
     public List<string> AnsweredQuestions;
 
-    // Noi câmpuri pentru sistemul de scor
-    public float FinalScore = 0f;  // Scorul calculat (0-100)
-    public int Stars = 1;          // Numărul de stele (1-5)
+    // Scorurile calculate
+    public float FinalScore = 0f;
+    public int Stars = 1;
 
+    // Statistici pe niveluri
     public LevelStats Level1 = new LevelStats();
     public LevelStats Level2 = new LevelStats();
 
@@ -674,6 +634,7 @@ public class SceneData
     }
 }
 
+// Structura pentru transferul datelor de progres
 public struct PlayerProgressData
 {
     public Vector3 Position;
@@ -681,6 +642,7 @@ public struct PlayerProgressData
     public int Lives;
 }
 
+// Vector3 serializabil pentru stocarea in JSON
 [System.Serializable]
 public class SerializableVector3
 {
@@ -690,6 +652,7 @@ public class SerializableVector3
 
     public SerializableVector3() { }
 
+    // Constructor din Vector3 Unity
     public SerializableVector3(Vector3 vector)
     {
         x = vector.x;
@@ -697,7 +660,7 @@ public class SerializableVector3
         z = vector.z;
     }
 
-    // Constructor nou care acceptă trei argumente float
+    // Constructor cu coordonate individuale
     public SerializableVector3(float x, float y, float z)
     {
         this.x = x;
@@ -705,6 +668,7 @@ public class SerializableVector3
         this.z = z;
     }
 
+    // Converteste inapoi la Vector3 Unity
     public Vector3 ToVector3()
     {
         return new Vector3(x, y, z);

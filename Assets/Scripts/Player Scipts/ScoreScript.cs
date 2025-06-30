@@ -1,26 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;  //!!! pentru a folosi "Text" linia 8
+using UnityEngine.UI;
 
 public class ScoreScript : MonoBehaviour
 {
-    //private Text coinTextScore;
-    private AudioSource audioManager;
-    // private int scoreCount;
+    [Header("Coin Settings")]
+    public float coinRespawnTime = 60f;
+    public AudioClip coinRespawnSound;
 
-    public Text coinRespawnTimerText; // Text UI pentru timer
-    public float coinRespawnTime = 60f; // Timpul până la reapariția monedei
-    public AudioClip coinRespawnSound; // Sunet pentru reapariție
-    private bool isCoinRespawning = false;
+    private AudioSource audioManager;
 
     private void Awake()
     {
         audioManager = GetComponent<AudioSource>();
-    }
-    void Start()
-    {
-        //   coinTextScore=GameObject.Find("CoinsText").GetComponent<Text>();
     }
 
     private void OnTriggerEnter2D(Collider2D target)
@@ -29,55 +22,26 @@ public class ScoreScript : MonoBehaviour
         {
             audioManager.Play();
             target.gameObject.SetActive(false);
-            //scoreCount++;
-            //coinTextScore.text = "x" + scoreCount;
-            // Actualizăm scorul prin GameManager
             GameManager.instance.AddScore(1);
-
-            StartCoroutine(ReappearCoinAfterTime(target.gameObject, coinRespawnTime)); // 60f = 60 secunde
+            StartCoroutine(ReappearCoinAfterTime(target.gameObject, coinRespawnTime));
         }
-        //if (target.tag == MyTags.LIFE_TAG)
-        //{
-        //    audioManager.Play();
-        //    target.gameObject.SetActive(false);
-        //    //scoreCount++;
-        //    //coinTextScore.text = "x" + scoreCount;
-        //    // Actualizăm scorul prin GameManager
-        //    GameManager.instance.AddLife(1);
-
-        //}
     }
 
+    // Reactiveaza moneda dupa timpul specificat
     IEnumerator ReappearCoinAfterTime(GameObject coin, float delay)
     {
-        //  yield return new WaitForSeconds(delay); // Așteaptă 1 minut
-        // coin.SetActive(true); // Re-apari moneda
-        isCoinRespawning = true;
-        float timeLeft = delay;
-
-        while (timeLeft > 0)
-        {
-            coinRespawnTimerText.text = ": " + Mathf.Ceil(timeLeft) + "s";
-            timeLeft -= Time.deltaTime;
-            yield return null;
-        }
+        yield return new WaitForSeconds(delay);
 
         coin.SetActive(true);
-
-        // Efect vizual la reapariție
         StartCoroutine(AnimateCoinAppearance(coin));
 
-        // Efect sonor
         if (coinRespawnSound != null)
         {
             audioManager.PlayOneShot(coinRespawnSound);
         }
-
-        isCoinRespawning = false;
-        coinRespawnTimerText.text = ""; // Șterge timer-ul după reapariție
-
     }
 
+    // Animatie de aparitie pentru moneda
     IEnumerator AnimateCoinAppearance(GameObject coin)
     {
         Vector3 originalScale = coin.transform.localScale;
@@ -95,8 +59,4 @@ public class ScoreScript : MonoBehaviour
 
         coin.transform.localScale = originalScale;
     }
-
-
-
-
 }

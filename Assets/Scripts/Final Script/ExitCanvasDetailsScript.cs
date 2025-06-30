@@ -31,6 +31,7 @@ public class ExitCanvasDetailsScript : MonoBehaviour
         }
     }
 
+    // Comuta intre canvas-ul principal si cel cu detalii
     public void SwitchCanvas(bool showDetails)
     {
         if (showDetails)

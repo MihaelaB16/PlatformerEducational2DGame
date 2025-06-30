@@ -2,6 +2,7 @@
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+// Manager pentru autentificare si gestionarea sesiunilor de utilizatori
 public class LoginManager : MonoBehaviour
 {
     public InputField usernameInput;
@@ -12,39 +13,33 @@ public class LoginManager : MonoBehaviour
     public static LoginManager instance;
     private string loggedInUsername;
 
+    // Initializare singleton pentru persistenta intre scene
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("LoginManager instance created.");
         }
         else
         {
-            Debug.LogWarning("Duplicate LoginManager instance detected and destroyed.");
             Destroy(gameObject);
         }
     }
 
+    // Configurare initiala si conectarea la UserManager
     void Start()
     {
         userManager = FindObjectOfType<UserManager>();
         Button loginButton = GameObject.Find("LoginButton")?.GetComponent<Button>();
         if (loginButton != null)
         {
-            loginButton.onClick.RemoveAllListeners(); // Elimină ascultătorii anteriori
-            loginButton.onClick.AddListener(OnLoginButtonClicked); // Adaugă metoda OnClick
-            Debug.Log("Login button OnClick reassigned.");
-        }
-        else
-        {
-            Debug.LogError("Login button not found in the scene.");
+            loginButton.onClick.RemoveAllListeners(); // Elimina ascultatorii anteriori
+            loginButton.onClick.AddListener(OnLoginButtonClicked); // Adauga metoda OnClick
         }
     }
-    
 
-
+    // Inregistreaza un utilizator nou
     public void Register()
     {
         string username = usernameInput.text;
@@ -52,14 +47,15 @@ public class LoginManager : MonoBehaviour
 
         if (userManager.RegisterUser(username, password))
         {
-            messageText.text = "Înregistrare reușită!";
+            messageText.text = "Inregistrare reusita!";
         }
         else
         {
-            messageText.text = "Utilizatorul deja există!";
+            messageText.text = "Utilizatorul deja exista!";
         }
     }
 
+    // Gestioneaza logarea utilizatorului
     public void OnLoginButtonClicked()
     {
         string username = usernameInput.text;
@@ -67,40 +63,41 @@ public class LoginManager : MonoBehaviour
 
         if (userManager.LoginUser(username, password, out UserProgress progress))
         {
-            SetLoggedInUsername(username); // Setează utilizatorul logat
-            Debug.Log($"User '{username}' logged in successfully.");
+            SetLoggedInUsername(username); // Seteaza utilizatorul logat
             messageText.text = $"Utilizatorul '{username}' a fost logat cu succes.";
             SceneManager.LoadScene("MainMenu");
         }
         else
         {
-            messageText.text = "Nume de utilizator sau parolă incorectă";
-            Debug.LogError("Invalid username or password.");
+            messageText.text = "Nume de utilizator sau parola incorecta";
         }
     }
 
+    // Seteaza utilizatorul curent logat
     public void SetLoggedInUsername(string username)
     {
         loggedInUsername = username;
-        Debug.Log($"Logged-in user set to: {loggedInUsername}");
     }
+
+    // Reseteaza starea de logare
     public void ResetLoginState()
     {
         if (LoginManager.instance != null)
         {
             LoginManager.instance.SetLoggedInUsername(null);
-            Debug.Log("Login state reset.");
         }
     }
+
+    // Obtine numele utilizatorului curent logat
     public string GetLoggedInUsername()
     {
         return loggedInUsername;
     }
 
-
+    // Incarca meniul principal cu intarziere (pentru efecte vizuale)
     private System.Collections.IEnumerator LoadMainMenuAfterDelay()
     {
         yield return new WaitForSeconds(2f);
-        SceneManager.LoadScene("MainMenu"); 
+        SceneManager.LoadScene("MainMenu");
     }
 }

@@ -2,13 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour
+public class SpiderScript : MonoBehaviour
 {
-
     private Animator anim;
     private Rigidbody2D myBody;
     private Vector3 moveDirection = Vector3.down;
-
     private string coroutine_Name = "ChangeMovement";
 
     private void Awake()
@@ -17,25 +15,23 @@ public class NewBehaviourScript : MonoBehaviour
         myBody = GetComponent<Rigidbody2D>();
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         StartCoroutine(coroutine_Name);
     }
 
-    // Update is called once per frame
     void Update()
     {
         MoveSpider();
     }
 
+    // Misca paianjenul pe verticala
     void MoveSpider()
     {
         transform.Translate(moveDirection * Time.smoothDeltaTime);
-
     }
 
-
+    // Schimba directia de miscare la intervale aleatorii
     IEnumerator ChangeMovement()
     {
         yield return new WaitForSeconds(Random.Range(2f, 5f));
@@ -50,8 +46,6 @@ public class NewBehaviourScript : MonoBehaviour
         }
 
         StartCoroutine(coroutine_Name);
-
-        
     }
 
     IEnumerator SpiderDead()
@@ -60,24 +54,19 @@ public class NewBehaviourScript : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-     void OnTriggerEnter2D(Collider2D target)
+    // Gestioneaza coliziunile cu proiectilele si jucatorul
+    void OnTriggerEnter2D(Collider2D target)
     {
         if (target.tag == MyTags.BULLET_TAG)
         {
             anim.Play("SpiderDead");
-
             myBody.bodyType = RigidbodyType2D.Dynamic;
             StartCoroutine(SpiderDead());
             StopCoroutine(coroutine_Name);
         }
-        if(target.tag == MyTags.PLAYER_TAG)
+        else if (target.tag == MyTags.PLAYER_TAG)
         {
             target.gameObject.GetComponent<PlayerDamage>().DealDamage();
         }
     }
-}//class
-
-
-
-
-
+}

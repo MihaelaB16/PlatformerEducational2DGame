@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+// Controller pentru miscarea si animatiile jucatorului
 public class PlayerMovement : MonoBehaviour
 {
-
     public float speed = 5f;
     private Rigidbody2D myBody;
     private Animator anim;
@@ -20,39 +20,36 @@ public class PlayerMovement : MonoBehaviour
 
     private BackgroundManager backgroundManager;
 
-    void Awake()  //prima apelata dupa run, apoi e start
+    // Initializare componente si gasire BackgroundManager
+    void Awake()
     {
         myBody = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
-
-        // Găsește BackgroundManager
         backgroundManager = FindObjectOfType<BackgroundManager>();
     }
-    // Start is called before the first frame update
+
+    // Incarca progresul salvat si restaureaza starea jucatorului
     private void Start()
     {
         string currentUser = LoginManager.instance?.GetLoggedInUsername();
-        Debug.Log($"Current logged-in user: {currentUser}");
         if (string.IsNullOrEmpty(currentUser))
         {
-            Debug.LogError("No logged-in user found. Cannot restore player progress.");
             return;
         }
 
         string currentScene = SceneManager.GetActiveScene().name;
         if (string.IsNullOrEmpty(currentScene))
         {
-            Debug.LogError("Current scene name is null or empty. Cannot restore player progress.");
             return;
         }
 
-        // Încarcă progresul complet
+        // Incarca progresul complet
         var progress = UserManager.instance.LoadPlayerProgress(currentUser, currentScene);
 
-        // Setează poziția
+        // Seteaza pozitia
         transform.position = progress.Position;
 
-        // Setează monedele în GameManager
+        // Seteaza monedele in GameManager
         if (GameManager.instance != null)
         {
             GameManager.instance.scoreCount = progress.Coins;
@@ -60,20 +57,21 @@ public class PlayerMovement : MonoBehaviour
                 GameManager.instance.coinTextScore.text = "x" + progress.Coins;
         }
 
-        // Setează viețile în PlayerDamage
+        // Seteaza vietile in PlayerDamage
         var playerDamage = GetComponent<PlayerDamage>();
         if (playerDamage != null)
         {
             playerDamage.SetLives(progress.Lives);
         }
 
-        // FIX: Setează fundalul corect bazat pe poziția X a jucătorului
+        // Seteaza fundalul corect bazat pe pozitia jucatorului
         if (backgroundManager != null)
         {
             Invoke("RefreshBackground", 0.3f);
         }
     }
 
+    // Actualizeaza fundalul dupa restaurarea pozitiei
     private void RefreshBackground()
     {
         if (backgroundManager != null)
@@ -82,16 +80,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-
-
-    // Update is called once per frame
+    // Verifica statusul de pe pamant si gestioneaza saritura
     void Update()
     {
-        //if (Physics2D.Raycast(groundCheckPosition.position, Vector2.down, 0.5f, groundLayer)) { 
-
-        //   print("Collision with ground ");
-        //}
-        Debug.Log($"Player position in Update: {transform.position}");
         float move = Input.GetAxis("Horizontal");
         transform.position += new Vector3(move * Time.deltaTime * 1f, 0, 0);
 
@@ -99,12 +90,13 @@ public class PlayerMovement : MonoBehaviour
         PlayerJump();
     }
 
-
+    // Gestioneaza miscarea laterala cu fizica
     private void FixedUpdate()
     {
         PlayerWalk();
     }
 
+    // Miscare laterala si actualizare animatii
     void PlayerWalk()
     {
         float h = Input.GetAxisRaw("Horizontal");
@@ -112,12 +104,12 @@ public class PlayerMovement : MonoBehaviour
         if (h > 0)
         {
             myBody.velocity = new Vector2(speed, myBody.velocity.y);
-            ChangeDirection(1); //merge la dreapta
+            ChangeDirection(1);
         }
         else if (h < 0)
         {
             myBody.velocity = new Vector2(-speed, myBody.velocity.y);
-            ChangeDirection(-1); //merge la stanga
+            ChangeDirection(-1);
         }
         else
         {
@@ -125,9 +117,9 @@ public class PlayerMovement : MonoBehaviour
         }
 
         anim.SetInteger("Speed", Mathf.Abs((int)myBody.velocity.x));
-
     }
 
+    // Schimba directia personajului prin scalare
     void ChangeDirection(int direction)
     {
         Vector3 tempScale = transform.localScale;
@@ -135,22 +127,17 @@ public class PlayerMovement : MonoBehaviour
         transform.localScale = tempScale;
     }
 
+    // Placeholder pentru coliziuni fizice
     private void OnCollisionEnter2D(Collision2D target)
     {
-        //if(target.gameObject.tag == "Ground")
-        //{
-        //    print("Collision with ground detected!");
-        //}
-
     }
+
+    // Placeholder pentru trigger-uri
     void OnTriggerEnter2D(Collider2D target)
     {
-        // if (target.tag == "Ground")
-        //{
-        //   print("Collision with tag");
-        //}
     }
 
+    // Verifica daca jucatorul este pe pamant folosind raycast
     void CheckIfGrounded()
     {
         isGrounded = Physics2D.Raycast(groundCheckPosition.position, Vector2.down, 0.1f, groundLayer);
@@ -165,6 +152,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    // Gestioneaza saritura cu spatiu si animatii
     void PlayerJump()
     {
         if (isGrounded)
@@ -173,11 +161,8 @@ public class PlayerMovement : MonoBehaviour
             {
                 jumped = true;
                 myBody.velocity = new Vector2(myBody.velocity.x, jumpPower);
-
                 anim.SetBool("Jump", true);
             }
         }
     }
-
-
-} //class
+}

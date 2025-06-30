@@ -4,45 +4,21 @@ using UnityEngine;
 
 public class PlayerShoot : MonoBehaviour
 {
-
+    [Header("Bullet Settings")]
     public GameObject fireBullet;
-
-   
-
 
     void Update()
     {
         ShootBullet();
     }
 
-
+    // Creeaza un proiectil cand se apasa tasta S
     void ShootBullet()
     {
-        if(Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S))
         {
-            GameObject bullet= Instantiate(fireBullet, transform.position, Quaternion.identity); // nu e nevoie de rotire dar trebuia pus parametrul asa ca am pus rotire pe 0 0 0
+            GameObject bullet = Instantiate(fireBullet, transform.position, Quaternion.identity);
             bullet.GetComponent<FireBullet>().Speed *= transform.localScale.x;
         }
     }
-} //class
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}

@@ -4,23 +4,24 @@ using UnityEngine;
 
 public class SnailScript : MonoBehaviour
 {
-
+    [Header("Movement Settings")]
     public float moveSpeed = 1f;
+
+    [Header("Collision Points")]
+    public Transform left_Collision;
+    public Transform right_Collision;
+    public Transform top_Collision;
+    public Transform down_Collision;
+
+    [Header("Detection")]
+    public LayerMask playerLayer;
+
     private Rigidbody2D myBody;
     private Animator anim;
     private AudioSource coinSound;
-
     private bool moveLeft;
-
     private bool canMove;
     private bool stunned;
-
-    public Transform left_Collision ,right_Collision ,top_Collision ,down_Collision;
-
-    private Vector3 left_Collision_Pos, right_Collision_Pos;
-
-    public LayerMask playerLayer;
-
     private int hitCount = 0;
     private bool isProcessingHit = false;
 
@@ -29,9 +30,6 @@ public class SnailScript : MonoBehaviour
         myBody = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         coinSound = GetComponent<AudioSource>();
-
-        left_Collision_Pos = left_Collision.position;
-        right_Collision_Pos = right_Collision.position;
     }
 
     void Start()
@@ -42,7 +40,15 @@ public class SnailScript : MonoBehaviour
 
     void Update()
     {
-        if (canMove) { 
+        MoveEnemy();
+        CheckCollision();
+    }
+
+    // Controleaza miscarea inamicului
+    void MoveEnemy()
+    {
+        if (canMove)
+        {
             if (moveLeft)
             {
                 myBody.velocity = new Vector2(-moveSpeed, myBody.velocity.y);
@@ -52,121 +58,86 @@ public class SnailScript : MonoBehaviour
                 myBody.velocity = new Vector2(moveSpeed, myBody.velocity.y);
             }
         }
-        CheckCollision();
     }
 
+    // Verifica coliziunile cu jucatorul si mediul
     void CheckCollision()
     {
-        RaycastHit2D leftHit = Physics2D.Raycast(left_Collision.position, Vector2.left, 0.1f,playerLayer);
+        RaycastHit2D leftHit = Physics2D.Raycast(left_Collision.position, Vector2.left, 0.1f, playerLayer);
         RaycastHit2D rightHit = Physics2D.Raycast(right_Collision.position, Vector2.right, 0.1f, playerLayer);
-
-
-        
         Collider2D topHit = Physics2D.OverlapCircle(top_Collision.position, 0.2f, playerLayer);
 
-        if (topHit != null && !isProcessingHit)
+        // Verifica daca jucatorul sare pe inamic
+        if (topHit != null && !isProcessingHit && topHit.gameObject.tag == MyTags.PLAYER_TAG)
         {
-            if (topHit.gameObject.tag == MyTags.PLAYER_TAG)
+            isProcessingHit = true;
+
+            if (!stunned)
             {
+                topHit.gameObject.GetComponent<Rigidbody2D>().velocity =
+                    new Vector2(topHit.gameObject.GetComponent<Rigidbody2D>().velocity.x, 7f);
 
-                isProcessingHit = true;
+                hitCount++;
 
-                if (!stunned)
+                if (hitCount >= 2)
                 {
-                    topHit.gameObject.GetComponent<Rigidbody2D>().velocity =
-                        new Vector2(topHit.gameObject.GetComponent<Rigidbody2D>().velocity.x, 7f);
+                    if (coinSound != null)
+                        coinSound.Play();
 
-                    hitCount++;
-                    Debug.Log("Hit Count: " + hitCount);
-                    if (hitCount >= 2) // Dacă a fost lovit de doua ori
+                    GameManager.instance.AddScore(1);
+                    canMove = false;
+                    myBody.velocity = new Vector2(0, 0);
+                    anim.Play("Stunned");
+                    stunned = true;
+
+                    if (tag == MyTags.BEETLE_TAG)
                     {
-                        if (coinSound != null)
-                        {
-                            coinSound.Play();
-                        }
-
-                        // Actualizăm scorul prin GameManager
-                        GameManager.instance.AddScore(1);
-                        canMove = false;
-                        myBody.velocity = new Vector2(0, 0);
-                        anim.Play("Stunned");
-                        stunned = true;
-
-                        //daca este gandacul atunci moare
-                        if (tag == MyTags.BEETLE_TAG)
-                        {
-                            anim.Play("Stunned");
-                            StartCoroutine(Dead(0.2f));
-                        }
+                        StartCoroutine(Dead(0.2f));
                     }
-                    else
-                    {
-                        anim.Play("Stunned"); 
-                    }
-                    StartCoroutine(ResetHitProcessing());
-                }
-            }
-        }
-
-        if (leftHit)
-        {
-            if (leftHit.collider.gameObject.tag == MyTags.PLAYER_TAG)
-            {
-                if(!stunned)
-                {
-                    //print("Damage left");
-                    leftHit.collider.gameObject.GetComponent<PlayerDamage>().DealDamage();
                 }
                 else
                 {
-                   
-
-                    if (tag!= MyTags.BEETLE_TAG)
-                    {
-                        myBody.velocity = new Vector2(15f, myBody.velocity.y);
-                        StartCoroutine(Dead(3f));
-                    }
+                    anim.Play("Stunned");
                 }
+                StartCoroutine(ResetHitProcessing());
             }
-
         }
 
-        if(rightHit)
+        // Verifica coliziunile laterale cu jucatorul
+        if (leftHit && leftHit.collider.gameObject.tag == MyTags.PLAYER_TAG)
         {
-            if (rightHit.collider.gameObject.tag == MyTags.PLAYER_TAG)
+            if (!stunned)
             {
-                if (!stunned)
-                {
-                    print("Damage right");
-                    rightHit.collider.gameObject.GetComponent<PlayerDamage>().DealDamage();
-                }
-                else
-                {
-                    if (tag != MyTags.BEETLE_TAG)
-                    {
-                        myBody.velocity = new Vector2(-15f, myBody.velocity.y);
-                        StartCoroutine(Dead(3f));
-                    }
-                }
+                leftHit.collider.gameObject.GetComponent<PlayerDamage>().DealDamage();
+            }
+            else if (tag != MyTags.BEETLE_TAG)
+            {
+                myBody.velocity = new Vector2(15f, myBody.velocity.y);
+                StartCoroutine(Dead(3f));
             }
         }
-        //if (Physics2D.Raycast(left_Collision.position, Vector2.down, 0.01f))
-        //{
-        //    ChangeDirection();
-        //}
-        //if (Physics2D.Raycast(right_Collision.position, Vector2.down, 0.01f))
-        //{
-        //    ChangeDirection();
-        //}
 
-        //daca nu exista coliziune cu pamantul, schimba directia
+        if (rightHit && rightHit.collider.gameObject.tag == MyTags.PLAYER_TAG)
+        {
+            if (!stunned)
+            {
+                rightHit.collider.gameObject.GetComponent<PlayerDamage>().DealDamage();
+            }
+            else if (tag != MyTags.BEETLE_TAG)
+            {
+                myBody.velocity = new Vector2(-15f, myBody.velocity.y);
+                StartCoroutine(Dead(3f));
+            }
+        }
+
+        // Schimba directia daca nu mai exista pamant in fata
         if (!Physics2D.Raycast(down_Collision.position, Vector2.down, 0.01f))
         {
-           ChangeDirection();
-
+            ChangeDirection();
         }
     }
 
+    // Schimba directia de miscare si orientarea sprite-ului
     void ChangeDirection()
     {
         moveLeft = !moveLeft;
@@ -192,30 +163,23 @@ public class SnailScript : MonoBehaviour
 
     IEnumerator ResetHitProcessing()
     {
-        yield return new WaitForSeconds(0.1f); // Timp de așteptare pentru a evita dublarea loviturilor
-        isProcessingHit = false; // Resetăm starea
+        yield return new WaitForSeconds(0.1f);
+        isProcessingHit = false;
     }
 
-    //private void OnCollisionEnter2D(Collision2D target)
-    //{
-    //    if(target.gameObject.tag == "Player")
-    //    {
-    //        anim.Play("Stunned");
-    //    }
-    //}
-
+    // Gestioneaza coliziunea cu proiectilele
     void OnTriggerEnter2D(Collider2D target)
     {
         if (target.tag == MyTags.BULLET_TAG)
         {
-            if(tag == MyTags.BEETLE_TAG)
+            if (tag == MyTags.BEETLE_TAG)
             {
                 anim.Play("Stunned");
                 canMove = false;
                 myBody.velocity = new Vector2(0, 0);
                 StartCoroutine(Dead(0.4f));
             }
-            if(tag == MyTags.SNAIL_TAG)
+            else if (tag == MyTags.SNAIL_TAG)
             {
                 if (!stunned)
                 {
@@ -230,32 +194,5 @@ public class SnailScript : MonoBehaviour
                 }
             }
         }
-    }   
-} //class
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    }
+}

@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class BirdScript : MonoBehaviour
 {
+    [Header("Movement Settings")]
+    public float speed = 2.5f;
+
+    [Header("Attack Settings")]
+    public GameObject birdEgg;
+    public LayerMask playerLayer;
 
     private Rigidbody2D myBody;
     private Animator anim;
-
     private Vector3 moveDirection = Vector3.left;
     private Vector3 originPosition;
     private Vector3 movePosition;
-
-    public GameObject birdEgg;
-    public LayerMask playerLayer;
-    private bool attacked=false;
-
+    private bool attacked = false;
     private bool canMove;
-    private float speed = 2.5f;
 
     private void Awake()
     {
@@ -25,7 +25,6 @@ public class BirdScript : MonoBehaviour
         anim = GetComponent<Animator>();
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         originPosition = transform.position;
@@ -37,24 +36,25 @@ public class BirdScript : MonoBehaviour
         canMove = true;
     }
 
-    // Update is called once per frame
     void Update()
     {
         MoveTheBird();
         DropTheEgg();
     }
 
+    // Controleaza miscarea pasarii intre doua puncte
     void MoveTheBird()
     {
-        if(canMove )
+        if (canMove)
         {
             transform.Translate(moveDirection * speed * Time.smoothDeltaTime);
-            if(transform.position.x >= originPosition.x)
+
+            if (transform.position.x >= originPosition.x)
             {
                 moveDirection = Vector3.left;
                 ChangeDirection(0.5f);
             }
-            else if(transform.position.x <= movePosition.x)
+            else if (transform.position.x <= movePosition.x)
             {
                 moveDirection = Vector3.right;
                 ChangeDirection(-0.5f);
@@ -62,6 +62,7 @@ public class BirdScript : MonoBehaviour
         }
     }
 
+    // Schimba orientarea sprite-ului
     void ChangeDirection(float direction)
     {
         Vector3 tempScale = transform.localScale;
@@ -69,11 +70,12 @@ public class BirdScript : MonoBehaviour
         transform.localScale = tempScale;
     }
 
+    // Arunca ou cand detecteaza jucatorul sub ea
     void DropTheEgg()
     {
         if (!attacked)
         {
-            if(Physics2D.Raycast(transform.position, Vector2.down, Mathf.Infinity, playerLayer))
+            if (Physics2D.Raycast(transform.position, Vector2.down, Mathf.Infinity, playerLayer))
             {
                 Instantiate(birdEgg, new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z), Quaternion.identity);
                 attacked = true;
@@ -88,31 +90,16 @@ public class BirdScript : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    // Gestioneaza coliziunea cu proiectilele
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == MyTags.BULLET_TAG)
         {
-            
             anim.Play("BirdDead");
-
             GetComponent<BoxCollider2D>().isTrigger = true;
             myBody.bodyType = RigidbodyType2D.Dynamic;
-
             canMove = false;
-
             StartCoroutine(BirdDead());
         }
     }
-
-} //class
-
-
-
-
-
-
-
-
-
-
-
+}

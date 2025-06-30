@@ -4,9 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+// Manager pentru sistemul de viata si damage al jucatorului
 public class PlayerDamage : MonoBehaviour
 {
-
     public static PlayerDamage instance;
     private Text lifeText;
     [SerializeField] private int lives = 3;
@@ -15,6 +15,8 @@ public class PlayerDamage : MonoBehaviour
 
     public string sceneName;
     private bool canDamage = true;
+
+    // Initializare singleton si componente UI
     void Awake()
     {
         if (instance == null)
@@ -26,35 +28,31 @@ public class PlayerDamage : MonoBehaviour
             Destroy(gameObject);
         }
         lifeText = GameObject.Find("LifeText").GetComponent<Text>();
-
         initialPosition = transform.position;
-        
-
     }
+
+    // Seteaza timpul normal de joc
     void Start()
     {
-        Time.timeScale = 1f;  //cand se incepe jocul, timpul va fi normal
+        Time.timeScale = 1f;
     }
 
-    // Update is called once per frame
+    // Aplica damage jucatorului si gestioneaza consecintele
     public void DealDamage()
     {
         if (!canDamage) return;
         if (canDamage)
         {
-
             lives--;
             if (lives >= 0)
             {
-                
                 Time.timeScale = 0f;
                 StartCoroutine(ReturnToFlag());
                 UpdateLifeUI();
             }
             else
             {
-                //restart game
-                // Time.timeScale = 0f;   //face ca totul sa stea pe loc (jocul sa fie oprit) totul va fi inghetat
+                // Restart complet al jocului
                 Time.timeScale = 0f;
                 StartCoroutine(RestartGame());
             }
@@ -63,62 +61,53 @@ public class PlayerDamage : MonoBehaviour
 
             StartCoroutine(WaitForDamage());
         }
-       
     }
-    //void Update()
-    //{
-    //    float move = Input.GetAxis("Horizontal");
-    //    transform.position += new Vector3(move * Time.deltaTime * 5f, 0, 0);
-    //}
 
+    // Protectie temporara impotriva damage-ului continuu
     IEnumerator WaitForDamage()
     {
         yield return new WaitForSeconds(2f);
         canDamage = true;
     }
 
+    // Intoarce jucatorul la ultimul checkpoint sau pozitia initiala
     IEnumerator ReturnToFlag()
     {
         yield return new WaitForSecondsRealtime(0.5f);
         Time.timeScale = 1f;
 
-        // Mutăm personajul la ultimul steag sau la poziția inițială
+        // Muta personajul la ultimul steag sau la pozitia initiala
         transform.position = (FlagController.lastFlagPosition != Vector3.zero) ? FlagController.lastFlagPosition : initialPosition;
 
-        // Folosește BackgroundManager pentru a seta fundalul corect
+        // Actualizeaza fundalul corect
         BackgroundManager backgroundManager = FindObjectOfType<BackgroundManager>();
         if (backgroundManager != null)
         {
             backgroundManager.RefreshBackground();
-            Debug.Log("PlayerDamage: BackgroundManager refreshed background");
-        }
-        else
-        {
-            Debug.LogWarning("PlayerDamage: BackgroundManager not found!");
         }
 
         UpdateLifeUI();
     }
 
-
+    // Restarteaza complet scena si reseteaza progresul
     IEnumerator RestartGame()
     {
-        yield return new WaitForSecondsRealtime(2f); // Așteaptă 2 secunde în timp real
+        yield return new WaitForSecondsRealtime(2f);
         UserManager.instance.ResetProgressForCurrentScene(
-            new Vector3(-10.0f, -3.0f, 0.0f), 
-            0,                               
-            3,                                 
-            0.0f                             
+            new Vector3(-10.0f, -3.0f, 0.0f),
+            0,
+            3,
+            0.0f
         );
 
         if (GameManager.instance != null)
         {
             GameManager.instance.ResetGameplayTime();
         }
-        SceneManager.LoadScene(sceneName); // Reîncarcă scena specificată
+        SceneManager.LoadScene(sceneName);
     }
 
-
+    // Detecteaza coliziuni cu obstacole si obiecte speciale
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag(MyTags.WATER_TAG) || collision.CompareTag(MyTags.THORNS_TAG))
@@ -129,50 +118,33 @@ public class PlayerDamage : MonoBehaviour
         {
             GameManager.instance.AddLife(1);
 
-            // Dacă vrei să salvezi imediat progresul:
+            // Salveaza imediat progresul
             string currentUser = LoginManager.instance?.GetLoggedInUsername();
             if (!string.IsNullOrEmpty(currentUser))
             {
-                UserManager.instance.UpdateLives(GetLives()); // Salvează progresul local și în JSON
+                UserManager.instance.UpdateLives(GetLives());
             }
             UserManager.instance.SaveProgressData();
             Destroy(collision.gameObject);
         }
     }
+
+    // Obtine numarul curent de vieti
     public int GetLives()
     {
         return lives;
     }
+
+    // Seteaza numarul de vieti si actualizeaza UI-ul
     public void SetLives(int value)
     {
         lives = value;
         UpdateLifeUI();
     }
 
+    // Actualizeaza textul UI pentru vieti
     public void UpdateLifeUI()
     {
-        
         lifeText.text = "x" + lives;
     }
-}//class
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}

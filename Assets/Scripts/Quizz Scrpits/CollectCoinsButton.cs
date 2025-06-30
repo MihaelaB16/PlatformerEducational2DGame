@@ -3,17 +3,18 @@ using UnityEngine.UI;
 
 public class CollectCoinsButton : MonoBehaviour
 {
-    public GameObject quizCanvas; // Referință către UI-ul quizului
-    public Button collectButton;  // Referință către butonul "Colectează Monede"
-
-   
+    [Header("UI References")]
+    public GameObject quizCanvas;
+    public Button collectButton;
 
     void Start()
     {
-        collectButton.gameObject.SetActive(false); // Dezactivează butonul inițial
+        collectButton.gameObject.SetActive(false);
     }
+
     void Update()
     {
+        // Afiseaza butonul daca jucatorul are putine monede
         if (GameManager.instance.scoreCount <= 10)
         {
             collectButton.gameObject.SetActive(true);
@@ -35,18 +36,16 @@ public class CollectCoinsButton : MonoBehaviour
             collectButton.gameObject.SetActive(false);
         }
     }
+
     public void ShowCollectButton()
     {
-        
-            collectButton.gameObject.SetActive(true);
-        
+        collectButton.gameObject.SetActive(true);
     }
 
     public void CollectMoreCoins()
     {
         quizCanvas.SetActive(false);
         collectButton.gameObject.SetActive(false);
-        Time.timeScale = 1f; // Reia jocul
+        Time.timeScale = 1f;
     }
-
 }

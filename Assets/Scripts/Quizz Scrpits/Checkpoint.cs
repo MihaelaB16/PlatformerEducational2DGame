@@ -5,23 +5,24 @@ using UnityEngine.UI;
 
 public class Checkpoint : MonoBehaviour
 {
-    public GameObject quizCanvas; // Referință către UI-ul quizului
+    [Header("Canvas-uri")]
+    public GameObject quizCanvas;
     public GameObject inputQuizCanvas;
-    public GameObject[] questionButtons; // Array cu toate butoanele întrebărilor
+
+    [Header("Elemente Quiz")]
+    public GameObject[] questionButtons;
     public GameObject imageQuestion;
     public GameObject btnBack;
     public GameObject noCoinsMessage;
     public GameObject btnContinue;
-    public GameObject coliderLeftCheckpoint; // Collider stânga
-    public GameObject coliderRightCheckpoint; // Collider dreapta
 
-
-
-    
+    [Header("Collidere")]
+    public GameObject coliderLeftCheckpoint;
+    public GameObject coliderRightCheckpoint;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player")) // ✅ Verificăm dacă nu e completat
+        if (other.CompareTag("Player"))
         {
             StartCoroutine(HandleCheckpoint());
         }
@@ -33,85 +34,70 @@ public class Checkpoint : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.5f);
         Time.timeScale = 1f;
 
+        // Activeaza collidere pentru a bloca jucatorul
         coliderLeftCheckpoint.SetActive(true);
         coliderRightCheckpoint.SetActive(true);
+
+        // Afiseaza instructiunile quiz-ului
         inputQuizCanvas.SetActive(true);
     }
+
     public void OnContinueInputButtonPressed()
     {
-        Debug.Log("🔄 Button_ContinueInput apăsat! Trec la quiz...");
-
-        // Ascunde canvas-ul cu instrucțiunile
         inputQuizCanvas.SetActive(false);
-
-        // Continuă cu logica existentă
         StartCoroutine(ShowQuizAfterInput());
     }
+
     IEnumerator ShowQuizAfterInput()
     {
-        // Afișează quiz-ul principal
         quizCanvas.SetActive(true);
-        yield return null; // Așteaptă un frame pentru ca UI-ul să se inițializeze
+        yield return null;
 
         if (GameManager.instance != null)
         {
             GameManager.instance.RefreshUIReferences();
         }
 
-        // Logica existentă pentru verificarea scorului
+        // Verifica daca jucatorul are monede suficiente
         if (GameManager.instance.scoreCount <= 0)
         {
-            Debug.Log("⚠️ Scor zero/negativ detectat! Afișez doar butonul Back.");
-
-            // Dezactivează toate butoanele de întrebări
+            // Nu are monede - afiseaza doar butonul Back
             foreach (GameObject button in questionButtons)
             {
                 button.SetActive(false);
             }
 
-            // Activează butonul Back
             if (btnBack != null)
-            {
                 btnBack.SetActive(true);
-            }
 
-            // Mesaj pentru monede insuficiente
             if (noCoinsMessage != null)
-            {
                 noCoinsMessage.SetActive(true);
-            }
+
             if (imageQuestion != null)
-            {
                 imageQuestion.SetActive(false);
-            }
+
             if (btnContinue != null)
-            {
                 btnContinue.SetActive(false);
-            }
         }
         else
         {
+            // Are monede - afiseaza quiz-ul complet
             if (imageQuestion != null)
-            {
                 imageQuestion.SetActive(true);
-            }
-            // Scor pozitiv, afișează butoanele de întrebări
+
             foreach (GameObject button in questionButtons)
             {
                 button.SetActive(true);
             }
 
             if (noCoinsMessage != null)
-            {
                 noCoinsMessage.SetActive(false);
-            }
         }
     }
+
     public void OnBackButtonPressed()
     {
-        Debug.Log("🔄 Dezactivez ColiderLeftCheckpoint și închid quiz-ul!");
-        coliderLeftCheckpoint.SetActive(false); // Dezactivează coliderul stânga
-        quizCanvas.SetActive(false); // Închide quiz-ul
+        coliderLeftCheckpoint.SetActive(false);
+        quizCanvas.SetActive(false);
     }
-
 }

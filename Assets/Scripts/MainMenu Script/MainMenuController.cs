@@ -6,20 +6,19 @@ using UnityEngine.UI;
 
 public class MainMenuController : MonoBehaviour
 {
+    [Header("UI References")]
+    public InputField usernameInput;
+    public InputField passwordInput;
+    public Text messageText;
+
     private UserManager userManager;
-    public InputField usernameInput; // For the username input field
-    public InputField passwordInput; // For the password input field
-    public Text messageText;         // For the message text
 
     private void Start()
     {
-        // Find the UserManager instance in the scene
         userManager = UserManager.instance;
-        if (userManager == null)
-        {
-            Debug.LogError("UserManager instance not found!");
-        }
     }
+
+    // Incarca o scena de joc si restaureaza progresul
     public void PlayGame(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
@@ -36,6 +35,8 @@ public class MainMenuController : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
+
+    // Configureaza butoanele cand se incarca scena de login
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (scene.name == "Login")
@@ -52,17 +53,9 @@ public class MainMenuController : MonoBehaviour
                 {
                     if (LoginManager.instance != null)
                     {
-                        LoginManager.instance.OnLoginButtonClicked(); // Call the method from LoginManager
-                    }
-                    else
-                    {
-                        Debug.LogError("LoginManager instance is null.");
+                        LoginManager.instance.OnLoginButtonClicked();
                     }
                 });
-            }
-            else
-            {
-                Debug.LogError("Login button not found in the scene.");
             }
         }
     }
@@ -71,17 +64,16 @@ public class MainMenuController : MonoBehaviour
     {
         LoginManager.instance.ResetLoginState();
         Destroy(LoginManager.instance.gameObject);
-        Debug.Log("Se încarcă scena Login...");
         SceneManager.LoadScene("Login");
     }
 
+    // Restaureaza progresul dupa incarcarea scenei
     private IEnumerator RestoreProgressAfterSceneLoad(string sceneName)
     {
         yield return new WaitUntil(() => SceneManager.GetActiveScene().name == sceneName);
-        yield return null; // așteaptă un frame pentru inițializare completă
+        yield return null;
 
         string username = LoginManager.instance.GetLoggedInUsername();
         UserManager.instance.RestoreProgressForScene(username, sceneName);
     }
-
 }

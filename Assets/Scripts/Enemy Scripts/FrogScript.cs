@@ -4,18 +4,17 @@ using UnityEngine;
 
 public class FrogScript : MonoBehaviour
 {
+    [Header("Detection Settings")]
+    public LayerMask playerLayer;
 
     private Animator anim;
     private Rigidbody2D myBody;
+    private GameObject player;
     private bool animation_Started;
     private bool animation_Finished;
-
     private int jumedTimes;
     private bool jumpLeft = true;
-
     private string coroutine_Name = "FrogJump";
-    public LayerMask playerLayer;
-    private GameObject player;
 
     void Awake()
     {
@@ -26,12 +25,13 @@ public class FrogScript : MonoBehaviour
     void Start()
     {
         StartCoroutine(coroutine_Name);
-        player=GameObject.FindGameObjectWithTag(MyTags.PLAYER_TAG);
+        player = GameObject.FindGameObjectWithTag(MyTags.PLAYER_TAG);
     }
 
     private void Update()
     {
-        if(Physics2D.OverlapCircle(transform.position, 0.3f, playerLayer))
+        // Verifica daca jucatorul este in apropiere pentru a aplica damage
+        if (Physics2D.OverlapCircle(transform.position, 0.3f, playerLayer))
         {
             player.GetComponent<PlayerDamage>().DealDamage();
         }
@@ -39,23 +39,23 @@ public class FrogScript : MonoBehaviour
 
     void LateUpdate()
     {
-        if(animation_Finished && animation_Started)
+        if (animation_Finished && animation_Started)
         {
             animation_Started = false;
-            
             transform.parent.position = transform.position;
             transform.localPosition = Vector3.zero;
         }
     }
 
+    // Gestioneaza saritul periodic al broastei
     IEnumerator FrogJump()
     {
         yield return new WaitForSeconds(Random.Range(1f, 4f));
 
         animation_Started = true;
         animation_Finished = false;
-
         jumedTimes++;
+
         if (jumpLeft)
         {
             anim.Play("FrogJumpLeft");
@@ -64,12 +64,13 @@ public class FrogScript : MonoBehaviour
         {
             anim.Play("FrogJumpRight");
         }
+
         StartCoroutine(coroutine_Name);
     }
 
+    // Apelata de animatie cand saritura se termina
     void AnimationFinished()
     {
-
         animation_Finished = true;
 
         if (jumpLeft)
@@ -80,6 +81,8 @@ public class FrogScript : MonoBehaviour
         {
             anim.Play("FrogIdleRight");
         }
+
+        // Schimba directia dupa 3 sarituri
         if (jumedTimes == 3)
         {
             jumedTimes = 0;
@@ -96,46 +99,15 @@ public class FrogScript : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    // Gestioneaza coliziunea cu proiectilele
     void OnTriggerEnter2D(Collider2D target)
     {
         if (target.tag == MyTags.BULLET_TAG)
         {
             anim.Play("FrogDead");
-
             myBody.bodyType = RigidbodyType2D.Dynamic;
             StartCoroutine(FrogDead());
             StopCoroutine(coroutine_Name);
         }
     }
-
-
-
-} //class
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
