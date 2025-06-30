@@ -36,6 +36,11 @@ public class UserManager : MonoBehaviour
         string sceneName = SceneManager.GetActiveScene().name;
         currentSceneName = sceneName;
 
+        if (sceneName == "MainMenu")
+        {
+            return; // Nu urmări timpul pentru MainMenu
+        }
+
         if (!sessionTimesPerScene.ContainsKey(sceneName))
             sessionTimesPerScene[sceneName] = 0f;
 
@@ -258,6 +263,12 @@ public class UserManager : MonoBehaviour
         }
 
         string currentScene = SceneManager.GetActiveScene().name;
+        if (currentScene == "MainMenu")
+        {
+            Debug.Log("MainMenu scene - skipping save");
+            return;
+        }
+
         if (!users[currentUser].Progress.Scenes.ContainsKey(currentScene))
         {
             users[currentUser].Progress.Scenes[currentScene] = new SceneData();
@@ -373,6 +384,12 @@ public class UserManager : MonoBehaviour
         }
 
         string currentScene = SceneManager.GetActiveScene().name;
+
+        if (currentScene == "MainMenu")
+        {
+            Debug.Log("MainMenu scene - skipping position save");
+            return;
+        }
 
         // Găsește jucătorul în scenă
         GameObject player = GameObject.FindGameObjectWithTag("Player");
